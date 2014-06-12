@@ -16,7 +16,7 @@ namespace OneCache.SystemTests
 	[TestFixture]
 	public class CacheProviderTests
 	{
-		readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.Products);
+		readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
 
 		[Test]
 		public void Add_Null_Should_Swallow_Exception()
@@ -112,7 +112,7 @@ namespace OneCache.SystemTests
 			{
 				var key = GetSomething();
 
-				Assert.IsNull(target.Get<string>(key, CacheRegions.ByEnum(RegionName.Currencies)));
+				Assert.IsNull(target.Get<string>(key, CacheRegions.ByEnum(RegionName.RegionName2)));
 			}
 		}
 		[Test]
@@ -163,6 +163,7 @@ namespace OneCache.SystemTests
 
 				string resultValue;
 				Assert.IsTrue(target.TryGet(key, _testRegion, out resultValue));
+
 				Assert.AreEqual(value, resultValue);
 			}
 		}
@@ -331,7 +332,7 @@ namespace OneCache.SystemTests
 		{
 				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), true);
 				var appFabricDistributedCacheFactory = new DistributedCacheFactory(appFabricCacheConfiguration);
-				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstanceName,
+				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
 				                            appFabricDistributedCacheFactory);
 		}
 	}
