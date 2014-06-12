@@ -86,11 +86,11 @@
   <ItemGroup>
     <ProjectReference Include="..\OneCache.AppFabric\OneCache.AppFabric.csproj">
       <Project>{C50DD25A-7BB1-46EB-AAA6-9C76EEF804D8}</Project>
-      <Name>Common.DistributedCaching.AppFabric</Name>
+      <Name>OneCache.AppFabric</Name>
     </ProjectReference>
     <ProjectReference Include="..\OneCache\OneCache.csproj">
       <Project>{356D5D9F-3685-4AA3-A02A-BF3508E811AD}</Project>
-      <Name>Common.DistributedCaching</Name>
+      <Name>OneCache</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -10,10 +10,11 @@ namespace OneCache.SystemTests.Infrastructure.PS
 			{
 				shell.Open();
 
-				var importCommand = new Command(@"Import-Module DistributedCacheAdministration;Use-CacheCluster", true);
+				var importAdminCommand = new Command(@"Import-Module DistributedCacheAdministration;Use-CacheCluster", true);
+
 				var scriptCommand = new Command(script, true);
 				
-				return shell.Execute(new[] { importCommand, scriptCommand });
+				return shell.Execute(new[] { importAdminCommand, scriptCommand });
 			}
 		}
 	}
