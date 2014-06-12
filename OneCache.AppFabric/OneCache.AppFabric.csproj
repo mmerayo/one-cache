@@ -106,17 +106,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common.Logging\Common.Logging.csproj">
-      <Project>{B4DB462F-9F9F-4697-84E1-E31A059D8529}</Project>
-      <Name>Common.Logging</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OneCache\OneCache.csproj">
-      <Project>{356D5D9F-3685-4AA3-A02A-BF3508E811AD}</Project>
-      <Name>Common.DistributedCaching</Name>
-    </ProjectReference>
+    <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ReadMe.txt" />
+    <ProjectReference Include="..\OneCache\OneCache.csproj">
+      <Project>{356D5D9F-3685-4AA3-A02A-BF3508E811AD}</Project>
+      <Name>OneCache</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
