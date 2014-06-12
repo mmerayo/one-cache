@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Otu.Services.Caching.AppFabric")]//TODO: THIS NAMES
+[assembly: AssemblyTitle("OneCache.AppFabric")]//TODO: THIS NAMES
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("Otu.Services.Caching.AppFabric")]
+[assembly: AssemblyProduct("OneCache.AppFabric")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

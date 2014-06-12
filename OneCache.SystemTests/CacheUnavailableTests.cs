@@ -12,7 +12,7 @@ namespace OneCache.SystemTests
 	{
 		private const string StartCacheClusterCommand = "Start-CacheCluster";
 		private const string StopCacheClusterCommand = "Stop-CacheCluster";
-		private readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.Products);
+		private readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
 
 		[TearDown]
 		public void OnTearDown()
@@ -77,7 +77,7 @@ namespace OneCache.SystemTests
 
 		private static DistributedCache GetCacheProvider()
 		{
-			return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstanceName, new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
+			return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
 		}
 	}
 }

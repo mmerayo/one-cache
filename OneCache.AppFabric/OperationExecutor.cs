@@ -8,7 +8,7 @@ namespace OneCache.AppFabric
 	{
 		private readonly OperationExecutionContext _context;
 		
-		private static readonly ILog Logger = LogManager.GetLogger("Otu.Services.Caching.AppFabric.AppFabricOperationExecutor");
+		private static readonly ILog Logger = LogManager.GetLogger(typeof(OperationExecutor<int>).Namespace+"OperationExecutor");
 		private readonly IExceptionHandler _exceptionHandler;
 		private bool _canExecuteOperation = true;
 		

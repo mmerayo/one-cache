@@ -2,7 +2,7 @@
 {
 	public enum RegionName
 	{
-		Products,
-		Currencies
+		RegionName1,
+		RegionName2
 	}
 }

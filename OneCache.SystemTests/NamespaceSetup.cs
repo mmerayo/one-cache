@@ -11,7 +11,7 @@ namespace OneCache.SystemTests
 	public class NamespaceSetup
 	{
 		public static string CacheName = "SysTest" + Guid.NewGuid().ToString("N").Substring(0, 10);
-		public static string ProductInstanceName = "Otu";//TODO: REMOVE, thi9s whole thin should be replaced by prefix
+		public static string ProductInstancePrefix = "ProductInstancePrefixSampleName";
 
 
 		[SetUp]
@@ -44,7 +44,7 @@ namespace OneCache.SystemTests
 		private static void GetCache_Should_Retrieve_Cache_Client(DistributedCacheFactory factory)
 		{
 #pragma warning disable 642
-			using (new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstanceName, factory)) ;
+			using (new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, factory)) ;
 #pragma warning restore 642
 		}
 	}
