@@ -3,6 +3,7 @@ using Microsoft.ApplicationServer.Caching;
 
 namespace OneCache.AppFabric
 {
+cover all the calls
 	internal class DataCacheWrapper
 	{
 		private readonly DataCache _realCache;
