@@ -1,3 +1,6 @@
+param(
+    [parameter(Mandatory=$true)] $testAssemblySuffix
+)
 
 $Root=Split-Path $MyInvocation.MyCommand.Path
 $Me	=Split-Path	$MyInvocation.MyCommand.Path -Leaf
@@ -17,19 +20,19 @@ function Set-DefaultCommands()
 	
 	if(!$script:OpenCoverCommand)
 	{
-		.\nuget install OpenCover -Version 4.5.2506 -outputDirectory .generationTools
+		NuGet-Deploy OpenCover 4.5.2506
 		$script:OpenCoverCommand = "$Root\.generationTools\OpenCover.4.5.2506\OpenCover.Console.exe"
 	}
 	
 	if(!$NunitCommand)
 	{
-		.\nuget install NUnit.Runners -Version 2.6.3 -outputDirectory .generationTools
+		NuGet-Deploy NUnit.Runners 2.6.3
 		$script:NunitCommand = "$Root\.generationTools\NUnit.Runners.2.6.3\tools\nunit-console.exe"
 	}
 	
 	if(!$ReportGeneratorCommand)
 	{
-		.\nuget install ReportGenerator -Version 1.9.1 -outputDirectory .generationTools
+		NuGet-Deploy ReportGenerator 1.9.1		
 		$script:ReportGeneratorCommand = "$Root\.generationTools\ReportGenerator.1.9.1.0\ReportGenerator.exe"
 	}
 	
@@ -37,6 +40,11 @@ function Set-DefaultCommands()
 	{
 		$script:ReportDir="$Root\CoverageReports"
 	}
+}
+
+function NuGet-Deploy($toolName, $toolVersion)
+{
+	.\nuget install $toolName -Version $toolVersion -outputDirectory .generationTools 
 }
 
 function Show-Usage()
@@ -50,7 +58,7 @@ function Bootstrap-FileLocations($solution)
 		throw "Solution must be specified";
 	}
 
-	if(!(Test-Path "$solution") -and $solution -ne "Payment")	# Temporary: allow "Payment" solution even though it doesn't exist yet (eoconnor)
+	if(!(Test-Path "$solution") )	
 	{
 		throw "Solution $solution not found"
 	}
@@ -83,13 +91,13 @@ function Run-OpenCover($solution, $specificUnitTests)
 
 	if($specificUnitTests)
 	{	
-		if(Test-Path "$solutionFolder\$specificUnitTests.UnitTests\bin\debug\")
+		if(Test-Path "$solutionFolder\$specificUnitTests.$testAssemblySuffix\bin\debug\")
 		{
-			$targetArgs = "$solutionFolder\$specificUnitTests.UnitTests\bin\debug\$specificUnitTests.UnitTests.dll $targetArgs"
+			$targetArgs = "$solutionFolder\$specificUnitTests.$testAssemblySuffix\bin\debug\$specificUnitTests.$testAssemblySuffix.dll $targetArgs"
 		}
 		else
 		{
-			throw "No unit tests found called $specificUnitTests.UnitTests"
+			throw "No unit tests found called $specificUnitTests.$testAssemblySuffix"
 		}
 	}
 	else
@@ -98,7 +106,7 @@ function Run-OpenCover($solution, $specificUnitTests)
 		foreach($folder in (Get-ChildItem $solutionFolder))
 		{
 			 #echo $folder.Name
-			 if(($folder.Name -ilike "$solutionName.*.UnitTests" -or $folder.Name -ilike "$solutionName.UnitTests") -and (Test-Path "$solutionFolder\$folder\bin\debug\$folder.dll"))
+			 if(($folder.Name -ilike "$solutionName.*.$testAssemblySuffix" -or $folder.Name -ilike "$solutionName.$testAssemblySuffix") -and (Test-Path "$solutionFolder\$folder\bin\debug\$folder.dll"))
 			 {
 				$targetArgs="$solutionFolder\$folder\bin\debug\$folder.dll $targetArgs"
 				$found=$found+1
@@ -115,8 +123,8 @@ function Run-OpenCover($solution, $specificUnitTests)
 					 "-targetargs:$targetArgs",
 					 "-output:$ReportDir\Coverage.xml",
 					 "-oldstyle",
-					 "-coverbytest:*.UnitTests",
-					 "-filter:+[(?i)($solutionName).*]* -[*.UnitTests]*"
+					 "-coverbytest:*.$testAssemblySuffix",
+					 "-filter:+[(?i)($solutionName).*]* -[*.$testAssemblySuffix]*"
 	if(!($NoRegister -eq 'true'))
 	{
 		$OpenCoverArgs += "-register"
