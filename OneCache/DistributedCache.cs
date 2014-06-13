@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using log4net;
 
@@ -81,7 +82,7 @@ namespace OneCache
 				catch (Exception e)
 				{
 					_log.ErrorFormat("Exception during distributedCache.Add for key={0}, region={1} Exception={2}",
-					                 key, region, e);
+									 key, region, e);
 				}
 			}
 			else
@@ -93,6 +94,24 @@ namespace OneCache
 			T value;
 
 			TryGet(key, region, out value);
+
+			return value;
+		}
+
+		public IEnumerable<KeyValuePair<string, object>> BulkGet(IEnumerable<string> keys, ICacheRegion region)
+		{
+			IEnumerable<KeyValuePair<string, object>> value;
+
+			TryBulkGet(keys, region, out value);
+
+			return value;
+		}
+
+		public IEnumerable<KeyValuePair<string, T>> BulkGet<T>(IEnumerable<string> keys, ICacheRegion region)
+		{
+			IEnumerable<KeyValuePair<string, T>> value;
+
+			TryBulkGet<T>(keys, region, out value);
 
 			return value;
 		}
@@ -118,12 +137,68 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.Get for key={0}, region={1} Exception={2}",
-				                 key,
-				                 region,
-				                 e);
+								 key,
+								 region,
+								 e);
 				return false;
 			}
 		}
+
+		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region, out IEnumerable<KeyValuePair<string, object>> value)
+		{
+			_log.DebugFormat("TryBulkGet - region={0}", region);
+
+			ThrowIfDisposed();
+
+			value = null;
+
+			var distributedCache = GetCache();
+			if (distributedCache == null)
+				return false;
+
+			try
+			{
+				distributedCache.TryBulkGet(keys, region, out value);
+
+				return value != null;
+			}
+			catch (Exception e)
+			{
+				_log.ErrorFormat("Exception during distributedCache.BulkGet for region={0} Exception={1}",
+								 region,
+								 e);
+				return false;
+			}
+		}
+
+		public bool TryBulkGet<T>(IEnumerable<string> keys, ICacheRegion region, out IEnumerable<KeyValuePair<string, T>> value)
+		{
+			_log.DebugFormat("TryBulkGet - region={0}", region);
+
+			ThrowIfDisposed();
+
+			value = null;
+
+			var distributedCache = GetCache();
+			if (distributedCache == null)
+				return false;
+
+			try
+			{
+				value=distributedCache.BulkGet<T>(keys, region);
+
+				return value != null;
+			}
+			catch (Exception e)
+			{
+				_log.ErrorFormat("Exception during distributedCache.TryBulkGet for region={0} Exception={1}",
+								 region,
+								 e);
+				return false;
+			}
+		}
+
+
 
 		public bool Remove(string key, ICacheRegion region = null)
 		{
@@ -140,9 +215,9 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.Remove for key={0}, region={1} Exception={2}",
-				                 key,
-				                 region,
-				                 e);
+								 key,
+								 region,
+								 e);
 				return false;
 			}
 
@@ -163,12 +238,35 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.RemoveRegion for region={0}, Message={1}",
-				                 region,
-				                 e.Message);
+								 region,
+								 e.Message);
 				return false;
 			}
 		}
+
+		public bool ClearRegion(ICacheRegion region)
+		{
+			_log.DebugFormat("ClearRegion - region={0}", region);
+
+			ThrowIfDisposed();
+			var distributedCache = GetCache();
+			if (distributedCache == null)
+				return false;
+			try
+			{
+				return distributedCache.ClearRegion(region);
+			}
+			catch (Exception e)
+			{
+				_log.ErrorFormat("Exception during distributedCache.ClearRegion for region={0}, Message={1}",
+								 region,
+								 e.Message);
+				return false;
+			}
+		}
+
 		
+
 		private void ThrowIfDisposed()
 		{
 			if (_factory == null)
@@ -183,17 +281,17 @@ namespace OneCache
 
 		~DistributedCache()
 		{
-            try{
-                Dispose(false);
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    _log.Error("Finalizer", ex);
-                }
-                catch { }
-            }
+			try{
+				Dispose(false);
+			}
+			catch (Exception ex)
+			{
+				try
+				{
+					_log.Error("Finalizer", ex);
+				}
+				catch { }
+			}
 		}
 
 		private void Dispose(bool disposing)

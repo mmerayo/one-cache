@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using log4net;
 using Microsoft.ApplicationServer.Caching;
 
@@ -6,15 +8,10 @@ namespace OneCache.AppFabric
 {
 	internal sealed class DistributedCache : IDistributedCache
 	{
-		private static readonly ILog Log = LogManager.GetLogger(typeof(DistributedCache));
+		private static readonly ILog Log = LogManager.GetLogger(typeof (DistributedCache));
 
 		private readonly DataCacheWrapper _cacheWrapper;
 		private readonly IConnectivityManager _connectivityManager;
-
-		private static string RegionKey(ICacheRegion region)
-		{
-			return region == null ? null : region.RegionKey();
-		}
 
 		public DistributedCache(DataCacheWrapper cacheWrapper, IConnectivityManager connectivityManager)
 		{
@@ -35,7 +32,8 @@ namespace OneCache.AppFabric
 				return;
 			}
 
-			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, RegionKey(region));
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
 			var executor = new OperationExecutor<DataCacheItemVersion>(context);
 			executor.Execute(() => _cacheWrapper.Put(key, value, RegionKey(region)));
 		}
@@ -52,7 +50,8 @@ namespace OneCache.AppFabric
 				return;
 			}
 
-			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, RegionKey(region));
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
 			var executor = new OperationExecutor<DataCacheItemVersion>(context);
 			executor.Execute(() => _cacheWrapper.Put(key, value, expirationTime, RegionKey(region)));
 		}
@@ -69,6 +68,28 @@ namespace OneCache.AppFabric
 			return value;
 		}
 
+		public IEnumerable<KeyValuePair<string,object>> BulkGet(IEnumerable<string> keys, ICacheRegion region) 
+		{
+			if (region == null) throw new ArgumentNullException("region");
+			Log.DebugFormat("BulkGet: region={0}", region);
+
+			IEnumerable<KeyValuePair<string,object>> value;
+
+			TryBulkGet(keys, region, out value);
+
+			return value;
+		}
+
+		public IEnumerable<KeyValuePair<string, T>> BulkGet<T>(IEnumerable<string> keys, ICacheRegion region)
+		{
+			Log.DebugFormat("BulkGet<{1}>: region={0}", region,typeof(T));
+			var candidates=BulkGet(keys, region);
+
+			return
+				candidates.Where(x => x.Value is T).Select(x => new KeyValuePair<string, T>(x.Key, (T) x.Value));
+		}
+
+
 		public bool TryGet<T>(string key, ICacheRegion region, out T value) where T : class
 		{
 			if (region == null) throw new ArgumentNullException("region");
@@ -77,7 +98,8 @@ namespace OneCache.AppFabric
 
 			if (_connectivityManager.CheckIsAvailable())
 			{
-				var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, RegionKey(region));
+				OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+					RegionKey(region));
 				var executor = new OperationExecutor<object>(context);
 				storedValue = executor.Execute(() => _cacheWrapper.Get(key, RegionKey(region)));
 			}
@@ -91,7 +113,26 @@ namespace OneCache.AppFabric
 				return false;
 			}
 
-			value = (T)storedValue;
+			value = (T) storedValue;
+			return true;
+		}
+
+		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region,
+			out IEnumerable<KeyValuePair<string, object>> result)
+		{
+			if (region == null) throw new ArgumentNullException("region");
+			Log.DebugFormat("TryBulkGet: region={0}", region);
+			result = null;
+
+			if (!_connectivityManager.CheckIsAvailable())
+			{
+				Log.Warn("AppFabric is not available");
+				return false;
+			}
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
+			var executor = new OperationExecutor<IEnumerable<KeyValuePair<string, object>>>(context);
+			result = executor.Execute(() => _cacheWrapper.BulkGet(keys, RegionKey(region)));
 			return true;
 		}
 
@@ -104,9 +145,28 @@ namespace OneCache.AppFabric
 				return false;
 			}
 
-			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, RegionKey(region));
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
 			var executor = new OperationExecutor<bool>(context);
-			return executor.Execute(() => region != null ? _cacheWrapper.Remove(key, RegionKey(region)) : _cacheWrapper.Remove(key));
+			return
+				executor.Execute(() => region != null ? _cacheWrapper.Remove(key, RegionKey(region)) : _cacheWrapper.Remove(key));
+		}
+
+		public bool ClearRegion(ICacheRegion region)
+		{
+			if (region == null) throw new ArgumentNullException("region");
+			Log.InfoFormat("ClearRegion: region={0}", region);
+
+			if (!_connectivityManager.CheckIsAvailable())
+			{
+				Log.Warn("AppFabric is not available");
+				return false;
+			}
+
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
+			var executor = new OperationExecutor<bool>(context);
+			return executor.Execute(() => _cacheWrapper.ClearRegion(RegionKey(region)));
 		}
 
 		public bool RemoveRegion(ICacheRegion region)
@@ -120,12 +180,20 @@ namespace OneCache.AppFabric
 				return false;
 			}
 
-			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, RegionKey(region));
+			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
+				RegionKey(region));
 			var executor = new OperationExecutor<bool>(context);
 			return executor.Execute(() => _cacheWrapper.RemoveRegion(RegionKey(region)));
-
 		}
-		public void Dispose() { }
-	}
 
+
+		public void Dispose()
+		{
+		}
+
+		private static string RegionKey(ICacheRegion region)
+		{
+			return region == null ? null : region.RegionKey();
+		}
+	}
 }
