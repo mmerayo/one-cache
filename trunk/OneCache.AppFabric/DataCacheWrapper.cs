@@ -1,24 +1,55 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.ApplicationServer.Caching;
 
 namespace OneCache.AppFabric
 {
-cover all the calls
 	internal class DataCacheWrapper
 	{
 		private readonly DataCache _realCache;
-		public DataCacheWrapper(){}
+
+		public DataCacheWrapper()
+		{
+		}
+
 		public DataCacheWrapper(DataCache realCache)
 		{
 			if (realCache == null) throw new ArgumentNullException("realCache");
 			_realCache = realCache;
 		}
 
+
+		public virtual object Get(string key, string region)
+		{
+			try
+			{
+				object result = _realCache.Get(key, region);
+				return result;
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+		}
+
+
+		public virtual IEnumerable<KeyValuePair<string,object>> BulkGet(IEnumerable<string> keys, string region)
+		{
+			try
+			{
+				return _realCache.BulkGet(keys, region);
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+		}
+
 		public virtual DataCacheItemVersion Put(string key, object value, string region)
 		{
 			try
 			{
-				var result = _realCache.Put(key, value, region);
+				DataCacheItemVersion result = _realCache.Put(key, value, region);
 				return result;
 			}
 			catch (DataCacheException e)
@@ -31,20 +62,7 @@ cover all the calls
 		{
 			try
 			{
-				var result = _realCache.Put(key, value, expirationTime, region);
-				return result;
-			}
-			catch (DataCacheException e)
-			{
-				throw new DataCacheExceptionWrapper(e);
-			}
-		}
-
-		public virtual object Get(string key, string region)
-		{
-			try
-			{
-				var result = _realCache.Get(key, region);
+				DataCacheItemVersion result = _realCache.Put(key, value, expirationTime, region);
 				return result;
 			}
 			catch (DataCacheException e)
@@ -57,7 +75,6 @@ cover all the calls
 		{
 			try
 			{
-				
 				return _realCache.Remove(key);
 			}
 			catch (DataCacheException e)
@@ -112,6 +129,19 @@ cover all the calls
 			{
 				throw new DataCacheExceptionWrapper(e);
 			}
+		}
+
+		public virtual bool ClearRegion(string regionName)
+		{
+			try
+			{
+				_realCache.ClearRegion(regionName);
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+			return true;
 		}
 	}
 }
