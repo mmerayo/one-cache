@@ -49,7 +49,7 @@ function NuGet-Deploy($toolName, $toolVersion)
 
 function Show-Usage()
 {
-		echo "TODO"
+		echo "opencover <<test assemblies suffix>>"
 }
 function Bootstrap-FileLocations($solution)
 {

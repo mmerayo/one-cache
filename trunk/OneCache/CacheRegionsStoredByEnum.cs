@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using log4net;
 
 namespace OneCache
 {
+	//TODO: remove static fields
+	//TODO: non-static and product instance name and version to be provided
 	internal static class CacheRegionsStoredByEnum<TEnum> 
 		where TEnum : struct
 	{
