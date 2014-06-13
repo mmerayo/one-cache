@@ -15,13 +15,13 @@ namespace OneCache.SystemTests
 	/// </remarks>
 	[TestFixture]
 	public class CacheProviderTests
-	{
+	{ 
 		readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
 
 		[Test]
 		public void Add_Null_Should_Swallow_Exception()
 		{
-			using (var target = GetCacheProvider())
+			using (var target = GetCacheProvider()) 
 			{
 				var key = GetSomething();
 
