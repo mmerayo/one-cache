@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Configuration;
+using log4net;
 using Microsoft.ApplicationServer.Caching;
 using StructureMap.Configuration.DSL;
-using log4net;
 
-
-namespace OneCache.AppFabric
+namespace OneCache.AppFabric.IoC.StructureMap
 {
-	public class CachingRegistry : Registry
+	public class CacheRegistry : Registry
 	{
-		private static readonly ILog _log = LogManager.GetLogger(typeof(CachingRegistry));
+		private static readonly ILog _log = LogManager.GetLogger(typeof(CacheRegistry));
 
-		public CachingRegistry()
+		public CacheRegistry()
 		{
 			try
 			{

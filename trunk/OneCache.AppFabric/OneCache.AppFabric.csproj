@@ -99,7 +99,7 @@
     <Compile Include="IConnectivityManager.cs" />
     <Compile Include="IExceptionHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CachingRegistry.cs" />
+    <Compile Include="IoC\StructureMap\CacheRegistry.cs" />
     <Compile Include="Properties\ManualAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
