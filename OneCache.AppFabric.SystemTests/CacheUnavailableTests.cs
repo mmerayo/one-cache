@@ -3,6 +3,7 @@ using System.Threading;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
 using OneCache.AppFabric.SystemTests.Infrastructure.PS;
+using OneCache.Regions;
 
 namespace OneCache.AppFabric.SystemTests
 {
@@ -11,7 +12,9 @@ namespace OneCache.AppFabric.SystemTests
 	{
 		private const string StartCacheClusterCommand = "Start-CacheCluster";
 		private const string StopCacheClusterCommand = "Stop-CacheCluster";
-		private readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
+		private readonly ICacheRegion _testRegion = new CacheRegionProvider().GetByEnum(RegionName.RegionName1);
+
+		
 
 		[TearDown]
 		public void OnTearDown()

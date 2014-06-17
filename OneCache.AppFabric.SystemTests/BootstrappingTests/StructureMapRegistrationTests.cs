@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using OneCache.AppFabric.IoC.StructureMap;
+using OneCache.Regions;
 using StructureMap;
 
 namespace OneCache.AppFabric.SystemTests.BootstrappingTests
@@ -31,7 +32,7 @@ namespace OneCache.AppFabric.SystemTests.BootstrappingTests
 
 			ObjectFactory.Initialize(c => c.AddRegistry(new CacheRegistry()));
 			
-			var publicInterfaces = Assembly.GetAssembly(typeof (CacheRegions)).GetTypes()
+			var publicInterfaces = Assembly.GetAssembly(typeof (CacheRegionProvider)).GetTypes()
 				.Where(x => x.IsPublic && x.IsInterface && !exclusionList.Contains(x.Name));
 			
 			foreach (var source in publicInterfaces)

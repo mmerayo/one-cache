@@ -1,4 +1,4 @@
-﻿namespace OneCache
+﻿namespace OneCache.Regions
 {
 	internal class SimpleCacheRegion : ICacheRegion
 	{

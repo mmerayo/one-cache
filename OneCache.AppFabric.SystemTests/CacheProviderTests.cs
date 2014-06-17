@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
+using OneCache.Regions;
 
 namespace OneCache.AppFabric.SystemTests
 {
@@ -17,7 +18,7 @@ namespace OneCache.AppFabric.SystemTests
 	[TestFixture]
 	public class CacheProviderTests
 	{
-		private readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
+		private readonly ICacheRegion _testRegion = new CacheRegionProvider().GetByEnum(RegionName.RegionName1);
 		private TestContext _context;
 
 		[SetUp]
@@ -136,7 +137,7 @@ namespace OneCache.AppFabric.SystemTests
 
 			var key = GetSomething();
 
-			Assert.IsNull(target.Get<string>(key, CacheRegions.ByEnum(RegionName.RegionName2)));
+			Assert.IsNull(target.Get<string>(key, new CacheRegionProvider().GetByEnum(RegionName.RegionName2)));
 		}
 
 		[Test]
