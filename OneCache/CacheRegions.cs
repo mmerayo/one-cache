@@ -12,10 +12,5 @@
 			//THIS SMELLS BADLY
 			return CacheRegionsStoredByEnum<TEnum>.GetOrCreateRegion(enumValue);
 		}
-
-		public static ICacheRegion BySystemValue(string systemRegionName)
-		{
-			return CacheRegionsStoredByEnum<int>.GetBySystemRegionName(systemRegionName);
-		}
 	}
 }

@@ -20,7 +20,7 @@ namespace OneCache.AppFabric.IoC.StructureMap
 
 				For<IDistributedCache>()
 					.Singleton()
-					.Use<DistributedCache>()
+					.Use<OneCache.DistributedCache>()
 					.Ctor<string>("cacheName")
 					.Is(productName)
 					.Ctor<string>("productInstanceName")
