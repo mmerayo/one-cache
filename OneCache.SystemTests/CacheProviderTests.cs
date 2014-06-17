@@ -321,7 +321,7 @@ namespace OneCache.SystemTests
 			}
 		}
 
-      
+	  
 		private static string GetSomething()
 		{
 			return Guid.NewGuid().ToString();
@@ -333,7 +333,7 @@ namespace OneCache.SystemTests
 				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), true);
 				var appFabricDistributedCacheFactory = new DistributedCacheFactory(appFabricCacheConfiguration);
 				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
-				                            appFabricDistributedCacheFactory);
+											appFabricDistributedCacheFactory);
 		}
 	}
 }

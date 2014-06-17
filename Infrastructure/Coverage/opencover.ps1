@@ -68,6 +68,7 @@ function Bootstrap-FileLocations($solution)
 	Ensure-CommandExists $ReportGeneratorCommand "Report Generator" $ReportGeneratorVersion
 	
 	echo "Ensuring that report dir $ReportDir exists."
+	Remove-Item -Recurse -Force $ReportDir
 	if(!(Test-Path $ReportDir))
 	{
 		New-Item -ItemType directory -Path $ReportDir
