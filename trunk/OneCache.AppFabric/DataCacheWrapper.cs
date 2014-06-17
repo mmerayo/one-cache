@@ -18,12 +18,16 @@ namespace OneCache.AppFabric
 			_realCache = realCache;
 		}
 
+		public virtual object Get(string key)
+		{
+			return Get(key, null);
+		}
 
 		public virtual object Get(string key, string region)
 		{
 			try
 			{
-				object result = _realCache.Get(key, region);
+				object result = region != null ? _realCache.Get(key, region) : _realCache.Get(key);
 				return result;
 			}
 			catch (DataCacheException e)
@@ -33,7 +37,7 @@ namespace OneCache.AppFabric
 		}
 
 
-		public virtual IEnumerable<KeyValuePair<string,object>> BulkGet(IEnumerable<string> keys, string region)
+		public virtual IEnumerable<KeyValuePair<string, object>> BulkGet(IEnumerable<string> keys, string region)
 		{
 			try
 			{
@@ -50,6 +54,19 @@ namespace OneCache.AppFabric
 			try
 			{
 				DataCacheItemVersion result = _realCache.Put(key, value, region);
+				return result;
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+		}
+
+		public DataCacheItemVersion Put(string key, object value)
+		{
+			try
+			{
+				DataCacheItemVersion result = _realCache.Put(key, value);
 				return result;
 			}
 			catch (DataCacheException e)
@@ -107,11 +124,11 @@ namespace OneCache.AppFabric
 			}
 		}
 
-		public virtual void Add(string key, object value)
+		public virtual DataCacheItemVersion Add(string key, object value)
 		{
 			try
 			{
-				_realCache.Add(key, value);
+				return _realCache.Add(key, value);
 			}
 			catch (DataCacheException e)
 			{
@@ -119,11 +136,11 @@ namespace OneCache.AppFabric
 			}
 		}
 
-		public virtual DataCacheItemVersion Add(string key, object value,string region)
+		public virtual DataCacheItemVersion Add(string key, object value, string region)
 		{
 			try
 			{
-				return _realCache.Add(key, value,region);
+				return _realCache.Add(key, value, region);
 			}
 			catch (DataCacheException e)
 			{
