@@ -321,16 +321,32 @@ namespace OneCache.SystemTests
 			}
 		}
 
+		[Test]
+		public void WhenNotConnectedFromTheStartUp_Uses_FirstRequest_ToConnect()
+		{
+			using (var target = GetCacheProvider(false))
+			{
+				var key = GetSomething();
+				var value = GetSomething();
+
+				target.Add(key, _testRegion, value);
+				Assert.IsNull(target.Get<string>(key, _testRegion));
+
+				Thread.Sleep(1500);
+				
+				target.Add(key, _testRegion, value);
+				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			}
+		}
 	  
 		private static string GetSomething()
 		{
 			return Guid.NewGuid().ToString();
 		}
-
-
-		private static DistributedCache GetCacheProvider()
+		
+		private static DistributedCache GetCacheProvider(bool connectOnStartUp=true)
 		{
-				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), true);
+				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), connectOnStartUp);
 				var appFabricDistributedCacheFactory = new DistributedCacheFactory(appFabricCacheConfiguration);
 				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
 											appFabricDistributedCacheFactory);
