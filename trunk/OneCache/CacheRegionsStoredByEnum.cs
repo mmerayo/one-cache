@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text.RegularExpressions;
 using log4net;
 
@@ -7,14 +8,16 @@ namespace OneCache
 {
 	//TODO: remove static fields
 	//TODO: non-static and product instance name and version to be provided
+	
 	internal static class CacheRegionsStoredByEnum<TEnum> 
 		where TEnum : struct
 	{
-		private static readonly ILog Logger = LogManager.GetLogger(typeof(CacheRegionsStoredByEnum<TEnum>));
+		private static readonly ILog Logger = LogManager.GetLogger(typeof (CacheRegionsStoredByEnum<TEnum>));
 
 		private static readonly Regex regionRegex = new Regex("[^a-zA-Z0-9 -]", RegexOptions.Compiled);
 
-		private static readonly ConcurrentDictionary<TEnum, ICacheRegion> Regions = new ConcurrentDictionary<TEnum, ICacheRegion>();
+		private static readonly ConcurrentDictionary<TEnum, ICacheRegion> Regions =
+			new ConcurrentDictionary<TEnum, ICacheRegion>();
 
 		private static ICacheRegion CreateRegion(TEnum enumValue)
 		{
@@ -22,7 +25,7 @@ namespace OneCache
 			try
 			{
 				//TODO: this is a prefix  
-				productInstanceName = "TODO";//ProductNaming.GetProductInstanceName();
+				productInstanceName = "TODO"; //ProductNaming.GetProductInstanceName();
 			}
 			catch (TypeInitializationException e)
 			{
@@ -30,11 +33,11 @@ namespace OneCache
 					"Type cctor - Swallowing exception: {0}{1}This should only happen in non production AppDomains like those related to automated testing",
 					e, Environment.NewLine);
 			}
-			var enumT = typeof(TEnum);
-			var regionName = string.Format("{0}-{1}-{2}-{3}", 
-				productInstanceName, 
+			var enumT = typeof (TEnum);
+			var regionName = string.Format("{0}-{1}-{2}-{3}",
+				productInstanceName,
 				enumT.Assembly.GetName().Version, //TODO: the version to be extracted from the entry assembly(not calling)
-				enumT.Name, 
+				enumT.Name,
 				enumValue);
 			var converted = ConvertToSupportedRegionFormat(regionName);
 			return new SimpleCacheRegion(converted);
@@ -48,6 +51,11 @@ namespace OneCache
 		private static string ConvertToSupportedRegionFormat(string src)
 		{
 			return src == null ? null : regionRegex.Replace(src, string.Empty);
+		}
+
+		public static ICacheRegion GetBySystemRegionName(string systemRegionName)
+		{
+			return Regions.SingleOrDefault(x => x.Value.RegionKey() == systemRegionName).Value;
 		}
 	}
 }

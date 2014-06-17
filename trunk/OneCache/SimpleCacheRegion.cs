@@ -9,12 +9,12 @@
 			_key = key;
 		}
 
-		public override string ToString()
+		public string RegionKey()
 		{
 			return _key;
 		}
 
-		public string RegionKey()
+		public override string ToString()
 		{
 			return _key;
 		}

@@ -100,6 +100,13 @@ namespace OneCache.AppFabric
 			Add(key,null,value);
 		}
 
+		public IEnumerable<object> GetObjectsInRegion(ICacheRegion region)
+		{
+			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, null);
+			var executor = new OperationExecutor<IEnumerable<object>>(context);
+			return executor.Execute(() => _cacheWrapper.GetObjectsInRegion(RegionKey(region)).Select(x=>x.Value));
+		}
+
 
 		public bool TryGet<T>(string key, ICacheRegion region, out T value) where T : class
 		{

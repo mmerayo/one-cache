@@ -23,6 +23,19 @@ namespace OneCache.AppFabric
 			return Get(key, null);
 		}
 
+		public virtual IEnumerable<KeyValuePair<string, object>> GetObjectsInRegion(string region)
+		{
+			try
+			{
+				var result = _realCache.GetObjectsInRegion(region);
+				return result;
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+		}
+
 		public virtual object Get(string key, string region)
 		{
 			try

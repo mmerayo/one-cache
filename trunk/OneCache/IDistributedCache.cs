@@ -24,5 +24,6 @@ namespace OneCache
 
 		void Add(string key, object value);
 		
+		IEnumerable<object> GetObjectsInRegion(ICacheRegion region);
 	}
 }

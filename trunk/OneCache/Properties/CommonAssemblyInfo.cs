@@ -1,8 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using System;
+﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
@@ -13,7 +12,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
-
 [assembly: InternalsVisibleTo("OneCache.AppFabric")]
 [assembly: InternalsVisibleTo("OneCache.SystemTests")]
 [assembly: InternalsVisibleTo("OneCache.UnitTests")]
