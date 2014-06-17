@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(true)]
 [assembly: InternalsVisibleTo("OneCache.AppFabric")]
 [assembly: InternalsVisibleTo("OneCache.SystemTests")]
+[assembly: InternalsVisibleTo("OneCache.AppFabric.SystemTests")]
 [assembly: InternalsVisibleTo("OneCache.UnitTests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] //So internals can be mocked
 

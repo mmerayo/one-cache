@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 
-namespace OneCache.SystemTests.Infrastructure.PS
+namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 {
 	public class PowerShell : IDisposable
 	{

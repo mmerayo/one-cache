@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Threading;
-using OneCache.AppFabric;
-using OneCache.SystemTests.Infrastructure.PS;
-
 using NUnit.Framework;
+using OneCache.AppFabric.SystemTests.Infrastructure.PS;
 
-namespace OneCache.SystemTests
+namespace OneCache.AppFabric.SystemTests
 {
 	[SetUpFixture]
 	public class NamespaceSetup
@@ -44,7 +42,7 @@ namespace OneCache.SystemTests
 		private static void GetCache_Should_Retrieve_Cache_Client(DistributedCacheFactory factory)
 		{
 #pragma warning disable 642
-			using (new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, factory)) ;
+			using (new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, factory)) ;
 #pragma warning restore 642
 		}
 	}

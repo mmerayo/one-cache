@@ -1,6 +1,6 @@
 ﻿using System.Management.Automation.Runspaces;
 
-namespace OneCache.SystemTests.Infrastructure.PS
+namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 {
 	public static class AppFabricPowerShell
 	{
