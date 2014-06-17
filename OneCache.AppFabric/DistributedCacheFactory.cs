@@ -30,7 +30,7 @@ namespace OneCache.AppFabric
 				throw new InvalidOperationException(string.Format("argument must be of type {0}",
 				                                                  typeof (DataCacheFactoryConfiguration).FullName));
 
-			Logger.InfoFormat("Connecting to App Fabric on {0}...", string.Join(", ", realConfiguration.Servers.Select(s => s.HostName + ":" + s.CachePort)));
+			Logger.DebugFormat("Connecting to App Fabric on {0}...", string.Join(", ", realConfiguration.Servers.Select(s => s.HostName + ":" + s.CachePort)));
 
 			if(configuration.ConnectOnStartUp)
 				DoGetFactory();

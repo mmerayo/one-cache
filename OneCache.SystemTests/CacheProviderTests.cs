@@ -15,357 +15,378 @@ namespace OneCache.SystemTests
 	/// </remarks>
 	[TestFixture]
 	public class CacheProviderTests
-	{ 
-		readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
+	{
+		private readonly ICacheRegion _testRegion = CacheRegions.ByEnum(RegionName.RegionName1);
+		private TestContext _context;
+
+		[SetUp]
+		public void OnSetup()
+		{
+			_context = new TestContext();
+		}
+
+		[TearDown]
+		public void OnTearDown()
+		{
+			_context.Dispose();
+		}
 
 		[Test]
 		public void Add_Null_Should_Swallow_Exception()
 		{
-			using (var target = GetCacheProvider()) 
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, null);
-			}
+			var key = GetSomething();
+
+			target.Add(key, _testRegion, null);
 		}
 
 		[Test]
 		public void Add_Null_Should_Swallow_Exception_And_Remove_Existing_Value()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
+			var key = GetSomething();
 
-				target.Add(key, _testRegion, "Hello World!");
-				target.Add(key, _testRegion, null);
-				var result = target.Get<string>(key, _testRegion);
+			target.Add(key, _testRegion, "Hello World!");
+			target.Add(key, _testRegion, null);
+			var result = target.Get<string>(key, _testRegion);
 
-				Assert.IsNull(result);
-			}
+			Assert.IsNull(result);
 		}
 
 		[Test]
 		public void Add_With_TimeSpan_Should_Cause_Value_To_Evict()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				string value = GetSomething();
+			var target = _context.Sut;
+			var key = GetSomething();
+			string value = GetSomething();
 
-				target.Add(key, _testRegion, value, TimeSpan.FromSeconds(3));
+			target.Add(key, _testRegion, value, TimeSpan.FromSeconds(3));
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 
-				Thread.Sleep(4000);
+			Thread.Sleep(4000);
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 
 		[Test]
 		public void Add_With_TimeSpan_By_Region_Should_Cause_Value_To_Evict()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				string value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value, TimeSpan.FromSeconds(3));
+			var key = GetSomething();
+			string value = GetSomething();
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			target.Add(key, _testRegion, value, TimeSpan.FromSeconds(3));
 
-				Thread.Sleep(4000);
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			Thread.Sleep(4000);
+
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Add_Null_By_Key_And_Region_Should_Swallow_Exception()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, null);
-			}
+			var key = GetSomething();
+
+			target.Add(key, _testRegion, null);
 		}
 
 		[Test]
 		public void Get_By_Key_Should_Return_Previously_Added_Value()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
-			}
+			target.Add(key, _testRegion, value);
+
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 		}
+
 		[Test]
 		public void Get_BeforeRegionIsCreated_ReturnsNull()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				Assert.IsNull(target.Get<string>(key, CacheRegions.ByEnum(RegionName.RegionName2)));
-			}
+			var key = GetSomething();
+
+			Assert.IsNull(target.Get<string>(key, CacheRegions.ByEnum(RegionName.RegionName2)));
 		}
+
 		[Test]
 		public void Get_By_Unknown_Key_Should_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			var key = GetSomething();
+
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Get_By_Unknown_Key_And_Region_Should_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				
+			var target = _context.Sut;
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			var key = GetSomething();
+
+
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Get_By_Key_And_Region_Should_Return_Previously_Added_Value()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
-			}
+			var key = GetSomething();
+			var value = GetSomething();
+
+			target.Add(key, _testRegion, value);
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Can_ClearRegion()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			var key = GetSomething();
+			var value = GetSomething();
 
-				target.ClearRegion(_testRegion);
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			target.Add(key, _testRegion, value);
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+
+			target.ClearRegion(_testRegion);
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void TryGet_By_Key_Should_Return_Previously_Added_Value()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				string resultValue;
-				Assert.IsTrue(target.TryGet(key, _testRegion, out resultValue));
+			target.Add(key, _testRegion, value);
 
-				Assert.AreEqual(value, resultValue);
-			}
+			string resultValue;
+			Assert.IsTrue(target.TryGet(key, _testRegion, out resultValue));
+
+			Assert.AreEqual(value, resultValue);
 		}
 
 		[Test]
 		public void TryGet_By_Unknown_Key_Should_Return_False()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				string resultValue;
-				Assert.IsFalse(target.TryGet(key, _testRegion, out resultValue));
-			}
+			var key = GetSomething();
+
+			string resultValue;
+			Assert.IsFalse(target.TryGet(key, _testRegion, out resultValue));
 		}
 
 		[Test]
 		public void TryGet_By_Unknown_Key_And_Region_Should_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				string resultValue;
-				Assert.IsFalse(target.TryGet(key, _testRegion, out resultValue));
-			}
+			var key = GetSomething();
+
+			string resultValue;
+			Assert.IsFalse(target.TryGet(key, _testRegion, out resultValue));
 		}
 
 		[Test]
 		public void TryGet_Bey_Key_And_Region_Should_Return_Previously_Added_Value()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
-				
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				string resultValue;
-				Assert.IsTrue(target.TryGet(key, _testRegion, out resultValue));
-				Assert.AreEqual(value, resultValue);
-			}
+
+			target.Add(key, _testRegion, value);
+
+			string resultValue;
+			Assert.IsTrue(target.TryGet(key, _testRegion, out resultValue));
+			Assert.AreEqual(value, resultValue);
 		}
 
 		[Test]
 		public void Remove_By_Key_And_Region_Should_Cause_Get_To_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
-				
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 
-				target.Remove(key, _testRegion);
+			target.Add(key, _testRegion, value);
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+
+			target.Remove(key, _testRegion);
+
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Remove_By_Region_Should_Cause_Get_To_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
-				
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 
-				target.RemoveRegion(_testRegion);
+			target.Add(key, _testRegion, value);
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+
+			target.RemoveRegion(_testRegion);
+
+			Assert.IsNull(target.Get<string>(key, _testRegion));
 		}
 
 		[Test]
 		public void Remove_By_Key_Should_Cause_Get_To_Return_Null()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			target.Add(key, value);
 
-				target.Remove(key, _testRegion);
+			Assert.AreEqual(value, target.Get<string>(key));
 
-				Assert.IsNull(target.Get<string>(key, _testRegion));
-			}
+			target.Remove(key);
+
+			Assert.IsNull(target.Get<string>(key));
 		}
 
 		[Test]
 		public void Remove_By_UnexistingKey_Does_Not_Throw()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
+			var target = _context.Sut;
 
-				Assert.DoesNotThrow(()=>target.Remove(key, _testRegion));
-			}
+			var key = GetSomething();
+
+			Assert.DoesNotThrow(() => target.Remove(key, _testRegion));
 		}
 
 		[Test]
 		public void Get_By_Key_And_Region_How_Fast_Can_We_Get_1000()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
-				
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
+			var key = GetSomething();
+			var value = GetSomething();
 
-				var stopwatch = new Stopwatch();
-				stopwatch.Start();
 
-				for (int i = 0; i < 1000; i++)
-					Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			target.Add(key, _testRegion, value);
 
-				stopwatch.Stop();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
 
-				Console.WriteLine(stopwatch.Elapsed);
-			}
+			for (int i = 0; i < 1000; i++)
+				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+
+			stopwatch.Stop();
+
+			Console.WriteLine(stopwatch.Elapsed);
 		}
 
 		[Test]
 		public void Get_By_Key_How_Fast_Can_We_Get_1000()
 		{
-			using (var target = GetCacheProvider())
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			var target = _context.Sut;
+			var key = GetSomething();
+			var value = GetSomething();
 
-				target.Add(key, _testRegion, value);
+			target.Add(key, _testRegion, value);
 
-				var stopwatch = new Stopwatch();
-				stopwatch.Start();
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
 
-				for (int i = 0; i < 1000; i++)
-					Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+			for (int i = 0; i < 1000; i++)
+				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 
-				stopwatch.Stop();
+			stopwatch.Stop();
 
-				Console.WriteLine(stopwatch.Elapsed);
-			}
+			Console.WriteLine(stopwatch.Elapsed);
 		}
 
 		[Test]
 		public void WhenNotConnectedFromTheStartUp_Uses_FirstRequest_ToConnect()
 		{
-			using (var target = GetCacheProvider(false))
-			{
-				var key = GetSomething();
-				var value = GetSomething();
+			_context.WithStartupConnectivityMode(false);
+			var target = _context.Sut;
 
-				target.Add(key, _testRegion, value);
-				Assert.IsNull(target.Get<string>(key, _testRegion));
+			var key = GetSomething();
+			var value = GetSomething();
 
-				Thread.Sleep(1500);
-				
-				target.Add(key, _testRegion, value);
-				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
-			}
+			target.Add(key, _testRegion, value);
+			Assert.IsNull(target.Get<string>(key, _testRegion));
+
+			Thread.Sleep(1500);
+
+			target.Add(key, _testRegion, value);
+			Assert.AreEqual(value, target.Get<string>(key, _testRegion));
 		}
-	  
+
 		private static string GetSomething()
 		{
 			return Guid.NewGuid().ToString();
 		}
-		
-		private static DistributedCache GetCacheProvider(bool connectOnStartUp=true)
+
+		private class TestContext : IDisposable
 		{
-				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), connectOnStartUp);
+			private bool _connectOnStartup = true;
+			private DistributedCache _sut = null;
+
+			public TestContext()
+			{
+			}
+
+			public TestContext WithStartupConnectivityMode(bool connectOnStartup = true)
+			{
+				_connectOnStartup = connectOnStartup;
+				return this;
+			}
+
+			public DistributedCache Sut
+			{
+				get { return _sut ?? GetSut(); }
+			}
+
+			private DistributedCache GetSut()
+			{
+				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), _connectOnStartup);
 				var appFabricDistributedCacheFactory = new DistributedCacheFactory(appFabricCacheConfiguration);
 				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
-											appFabricDistributedCacheFactory);
+					appFabricDistributedCacheFactory);
+			}
+
+			public void Dispose()
+			{
+				if (_sut != null)
+				{
+					_sut.Dispose();
+					_sut = null;
+				}
+			}
 		}
 	}
 }

@@ -56,6 +56,16 @@ namespace OneCache
 			return _cacheInstance;
 		}
 
+		public void Add(string key, object value)
+		{
+			Add(key,null,value);
+		}
+
+		public void Add(string key, object value, TimeSpan expirationTime)
+		{
+			Add(key,null,value,expirationTime);
+		}
+
 		public void Add(string key, ICacheRegion region, object value)
 		{
 			Add(key, region, value, TimeSpan.MinValue);
@@ -75,9 +85,15 @@ namespace OneCache
 				try
 				{
 					if (expirationTime < TimeSpanZero)
-						distributedCache.Add(key, region, value);
+						if(region!=null)
+							distributedCache.Add(key, region, value);
+						else
+							distributedCache.Add(key, value);
 					else
-						distributedCache.Add(key, region, value, expirationTime);
+						if (region != null)
+							distributedCache.Add(key, region, value, expirationTime);
+						else
+							distributedCache.Add(key,  value, expirationTime);
 				}
 				catch (Exception e)
 				{
@@ -94,6 +110,15 @@ namespace OneCache
 			T value;
 
 			TryGet(key, region, out value);
+
+			return value;
+		}
+
+		public T Get<T>(string key) where T : class
+		{
+			T value;
+
+			TryGet(key, null, out value);
 
 			return value;
 		}
@@ -130,7 +155,8 @@ namespace OneCache
 			
 			try
 			{
-				value = distributedCache.Get<T>(key, region);
+
+				value = region != null ? distributedCache.Get<T>(key, region) : distributedCache.Get<T>(key);
 
 				return value != default(T);
 			}
@@ -142,6 +168,11 @@ namespace OneCache
 								 e);
 				return false;
 			}
+		}
+
+		public bool TryGet<T>(string key, out T value) where T : class
+		{
+			return TryGet(key, null, out value);
 		}
 
 		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region, out IEnumerable<KeyValuePair<string, object>> value)
@@ -305,5 +336,8 @@ namespace OneCache
 							_factory = null;
 						}
 		}
+
+
+		
 	}
 }

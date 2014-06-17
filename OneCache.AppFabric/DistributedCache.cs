@@ -21,9 +21,13 @@ namespace OneCache.AppFabric
 			_connectivityManager = connectivityManager;
 		}
 
+		public void Add(string key, object value, TimeSpan expirationTime)
+		{
+			Add(key,null,value,expirationTime);
+		}
+
 		public void Add(string key, ICacheRegion region, object value)
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("Add: key={0}, value={1}, region={2}", key, value, region);
 
 			if (!_connectivityManager.CheckIsAvailable())
@@ -35,13 +39,12 @@ namespace OneCache.AppFabric
 			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
 				RegionKey(region));
 			var executor = new OperationExecutor<DataCacheItemVersion>(context);
-			executor.Execute(() => _cacheWrapper.Add(key, value, RegionKey(region)));
+			executor.Execute(() => region!=null? _cacheWrapper.Put(key, value, RegionKey(region)):_cacheWrapper.Put(key, value));
 		}
 
 
 		public void Add(string key, ICacheRegion region, object value, TimeSpan expirationTime)
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("Add: key={0}, value={1}, timeout={2}, region={3}", key, value, expirationTime, region);
 
 			if (!_connectivityManager.CheckIsAvailable())
@@ -58,7 +61,6 @@ namespace OneCache.AppFabric
 
 		public T Get<T>(string key, ICacheRegion region) where T : class
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("Get: key={0}, region={1}", key, region);
 
 			T value;
@@ -68,9 +70,13 @@ namespace OneCache.AppFabric
 			return value;
 		}
 
+		public T Get<T>(string key) where T : class
+		{
+			return Get<T>(key, null);
+		}
+
 		public IEnumerable<KeyValuePair<string,object>> BulkGet(IEnumerable<string> keys, ICacheRegion region) 
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("BulkGet: region={0}", region);
 
 			IEnumerable<KeyValuePair<string,object>> value;
@@ -89,10 +95,14 @@ namespace OneCache.AppFabric
 				candidates.Where(x => x.Value is T).Select(x => new KeyValuePair<string, T>(x.Key, (T) x.Value));
 		}
 
+		public void Add(string key, object value)
+		{
+			Add(key,null,value);
+		}
+
 
 		public bool TryGet<T>(string key, ICacheRegion region, out T value) where T : class
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("TryGet: key={0}, region={1}", key, region);
 			object storedValue = null;
 
@@ -101,7 +111,7 @@ namespace OneCache.AppFabric
 				OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
 					RegionKey(region));
 				var executor = new OperationExecutor<object>(context);
-				storedValue = executor.Execute(() => _cacheWrapper.Get(key, RegionKey(region)));
+				storedValue = executor.Execute(() =>region!=null? _cacheWrapper.Get(key, RegionKey(region)):_cacheWrapper.Get(key));
 			}
 			else
 			{
@@ -117,10 +127,14 @@ namespace OneCache.AppFabric
 			return true;
 		}
 
+		public bool TryGet<T>(string key, out T value) where T : class
+		{
+			return TryGet(key, null, out value);
+		}
+
 		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region,
 			out IEnumerable<KeyValuePair<string, object>> result)
 		{
-			if (region == null) throw new ArgumentNullException("region");
 			Log.DebugFormat("TryBulkGet: region={0}", region);
 			result = null;
 
@@ -138,7 +152,7 @@ namespace OneCache.AppFabric
 
 		public bool Remove(string key, ICacheRegion region = null)
 		{
-			Log.InfoFormat("Remove: key={0}, region={1}", key, region);
+			Log.DebugFormat("Remove: key={0}, region={1}", key, region);
 			if (!_connectivityManager.CheckIsAvailable())
 			{
 				Log.Warn("AppFabric is not available");
@@ -154,8 +168,7 @@ namespace OneCache.AppFabric
 
 		public bool ClearRegion(ICacheRegion region)
 		{
-			if (region == null) throw new ArgumentNullException("region");
-			Log.InfoFormat("ClearRegion: region={0}", region);
+			Log.DebugFormat("ClearRegion: region={0}", region);
 
 			if (!_connectivityManager.CheckIsAvailable())
 			{
@@ -171,8 +184,7 @@ namespace OneCache.AppFabric
 
 		public bool RemoveRegion(ICacheRegion region)
 		{
-			if (region == null) throw new ArgumentNullException("region");
-			Log.InfoFormat("RemoveRegion: region={0}", region);
+			Log.DebugFormat("RemoveRegion: region={0}", region);
 
 			if (!_connectivityManager.CheckIsAvailable())
 			{
