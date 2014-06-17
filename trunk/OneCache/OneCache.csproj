@@ -87,7 +87,7 @@
     <Compile Include="ICacheRegion.cs" />
     <Compile Include="Infrastructure\TaskExceptionsLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\ManualAssemblyInfo.cs" />
+    <Compile Include="Properties\CommonAssemblyInfo.cs" />
     <Compile Include="SimpleCacheRegion.cs" />
   </ItemGroup>
   <ItemGroup>
