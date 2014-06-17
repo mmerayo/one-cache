@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
@@ -300,6 +302,31 @@ namespace OneCache.AppFabric.SystemTests
 			var key = GetSomething();
 
 			Assert.DoesNotThrow(() => target.Remove(key, _testRegion));
+		}
+
+		[Test]
+		public void Can_BulkGet()
+		{
+			var target = _context.Sut;
+
+			int capacity = 1000;
+			var dictionary = new Dictionary<string, string>(capacity);
+			for (int i = 0; i < capacity; i++)
+			{
+				string key = GetSomething();
+				string value = GetSomething();
+				dictionary.Add(key,value);
+				target.Add(key,_testRegion,value);
+			}
+
+
+			IEnumerable<KeyValuePair<string, string>> keyValuePairs = target.BulkGet<string>(dictionary.Keys.Select(x => x), _testRegion);
+			Assert.IsTrue(keyValuePairs.Count()==capacity);
+			foreach (var keyValuePair in keyValuePairs)
+			{
+				Assert.AreEqual(dictionary[keyValuePair.Key],keyValuePair.Value);
+			}
+
 		}
 
 		[Test]
