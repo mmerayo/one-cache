@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using OneCache.Regions;
 using Ploeh.AutoFixture;
 using Rhino.Mocks;
 
@@ -109,7 +110,7 @@ namespace OneCache.UnitTests
 
 			var sut = testContext.Sut;
 
-			region = CacheRegionsStoredByEnum<RegionName>.GetOrCreateRegion(RegionName.Currencies);
+			region =  testContext.CacheRegionProvider.GetByEnum(RegionName.Currencies);
 			var actual = sut.Get<object>(key, region);
 
 			testContext.AssertGetWasCalled<object>(key, region);
@@ -170,6 +171,7 @@ namespace OneCache.UnitTests
 
 			private IDistributedCache DistributedCache { get; set; }
 
+			public ICacheRegionProvider CacheRegionProvider { get; private set; }
 
 			public TestContext()
 			{
@@ -180,6 +182,7 @@ namespace OneCache.UnitTests
 				Factory = MockRepository.GenerateMock<IDistributedCacheFactory>();
 				DistributedCache = MockRepository.GenerateMock<IDistributedCache>();
 				Factory.Stub(x => x.GetCache(CacheName)).Return(DistributedCache);
+				CacheRegionProvider=new CacheRegionProvider();
 			}
 
 
@@ -193,7 +196,7 @@ namespace OneCache.UnitTests
 			{
 				var localKey = _fixture.CreateAnonymous<string>();
 				var localValue = _fixture.CreateAnonymous<TValue>();
-				var localRegion = CacheRegionsStoredByEnum<RegionName>.GetOrCreateRegion(_fixture.CreateAnonymous<RegionName>());
+				var localRegion = CacheRegionProvider.GetByEnum(_fixture.CreateAnonymous<RegionName>());
 				var localExpiration = _fixture.CreateAnonymous<TimeSpan>();
 
 				key = localKey;

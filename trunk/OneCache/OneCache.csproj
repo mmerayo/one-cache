@@ -79,8 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DistributedCache.cs" />
-    <Compile Include="CacheRegionsStoredByEnum.cs" />
-    <Compile Include="CacheRegions.cs" />
+    <Compile Include="Infrastructure\IoC\StructureMapBaseRegistry.cs" />
+    <Compile Include="Regions\CacheRegionProvider.cs" />
+    <Compile Include="Regions\ICacheRegionProvider.cs" />
     <Compile Include="ICacheConfiguration.cs" />
     <Compile Include="IDistributedCacheFactory.cs" />
     <Compile Include="IDistributedCache.cs" />
@@ -88,7 +89,7 @@
     <Compile Include="Infrastructure\TaskExceptionsLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\CommonAssemblyInfo.cs" />
-    <Compile Include="SimpleCacheRegion.cs" />
+    <Compile Include="Regions\SimpleCacheRegion.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

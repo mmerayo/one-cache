@@ -2,11 +2,12 @@
 using System.Configuration;
 using log4net;
 using Microsoft.ApplicationServer.Caching;
+using OneCache.Infrastructure.IoC;
 using StructureMap.Configuration.DSL;
 
 namespace OneCache.AppFabric.IoC.StructureMap
 {
-	public class CacheRegistry : Registry
+	public class CacheRegistry : StructureMapBaseRegistry
 	{
 		private static readonly ILog _log = LogManager.GetLogger(typeof(CacheRegistry));
 
