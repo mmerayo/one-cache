@@ -116,6 +116,7 @@
     <Compile Include="..\OneCache\Properties\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="BootstrappingTests\StructureMapRegistrationTests.cs" />
     <Compile Include="CacheProviderTests.cs" />
     <Compile Include="CacheUnavailableTests.cs" />
     <Compile Include="Infrastructure\PS\AppFabricPowerShell.cs" />
