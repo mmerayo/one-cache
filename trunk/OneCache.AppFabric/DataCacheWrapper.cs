@@ -119,6 +119,18 @@ namespace OneCache.AppFabric
 			}
 		}
 
+		public virtual DataCacheItemVersion Add(string key, object value,string region)
+		{
+			try
+			{
+				return _realCache.Add(key, value,region);
+			}
+			catch (DataCacheException e)
+			{
+				throw new DataCacheExceptionWrapper(e);
+			}
+		}
+
 		public virtual bool CreateRegion(string regionName)
 		{
 			try

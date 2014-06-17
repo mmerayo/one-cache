@@ -35,7 +35,7 @@ namespace OneCache.AppFabric
 			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
 				RegionKey(region));
 			var executor = new OperationExecutor<DataCacheItemVersion>(context);
-			executor.Execute(() => _cacheWrapper.Put(key, value, RegionKey(region)));
+			executor.Execute(() => _cacheWrapper.Add(key, value, RegionKey(region)));
 		}
 
 

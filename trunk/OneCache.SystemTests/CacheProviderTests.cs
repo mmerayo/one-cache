@@ -152,6 +152,22 @@ namespace OneCache.SystemTests
 		}
 
 		[Test]
+		public void Can_ClearRegion()
+		{
+			using (var target = GetCacheProvider())
+			{
+				var key = GetSomething();
+				var value = GetSomething();
+
+				target.Add(key, _testRegion, value);
+				Assert.AreEqual(value, target.Get<string>(key, _testRegion));
+
+				target.ClearRegion(_testRegion);
+				Assert.IsNull(target.Get<string>(key, _testRegion));
+			}
+		}
+
+		[Test]
 		public void TryGet_By_Key_Should_Return_Previously_Added_Value()
 		{
 			using (var target = GetCacheProvider())
