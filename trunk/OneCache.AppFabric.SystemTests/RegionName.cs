@@ -1,4 +1,4 @@
-﻿namespace OneCache.SystemTests
+﻿namespace OneCache.AppFabric.SystemTests
 {
 	public enum RegionName
 	{

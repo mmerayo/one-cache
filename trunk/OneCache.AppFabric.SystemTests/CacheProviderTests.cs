@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using OneCache.AppFabric;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
 
-namespace OneCache.SystemTests
+namespace OneCache.AppFabric.SystemTests
 {
 	/// <summary>
 	/// 	System tests the distributedCache component.
@@ -373,7 +370,7 @@ namespace OneCache.SystemTests
 		private class TestContext : IDisposable
 		{
 			private bool _connectOnStartup = true;
-			private DistributedCache _sut = null;
+			private OneCache.DistributedCache _sut = null;
 
 			public TestContext()
 			{
@@ -385,16 +382,16 @@ namespace OneCache.SystemTests
 				return this;
 			}
 
-			public DistributedCache Sut
+			public OneCache.DistributedCache Sut
 			{
 				get { return _sut ?? GetSut(); }
 			}
 
-			private DistributedCache GetSut()
+			private OneCache.DistributedCache GetSut()
 			{
 				var appFabricCacheConfiguration = new CacheConfiguration(new DataCacheFactoryConfiguration(), _connectOnStartup);
 				var appFabricDistributedCacheFactory = new DistributedCacheFactory(appFabricCacheConfiguration);
-				return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
+				return new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
 					appFabricDistributedCacheFactory);
 			}
 

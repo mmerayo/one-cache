@@ -8,7 +8,7 @@ namespace OneCache.Infrastructure
 	{
 		public static Task LogTaskException(this Task theTask, ILog theLogger, string logPrefix = "")
 		{
-		    return theTask.LogTaskException(theLogger.Error);
+			return theTask.LogTaskException(theLogger.Error);
 		}
 
 
@@ -20,10 +20,10 @@ namespace OneCache.Infrastructure
 			{
 				var aggException = task.Exception.Flatten();
 				foreach (var exception in aggException.InnerExceptions)
-					logExecutor(string.Format("{0} - There was an exception while executing the task. Details: {1}", logPrefix, exception));
+					logExecutor(string.Format("{0} - There was an exception while executing the task. Details: {1}", logPrefix,
+						exception));
 			}, TaskContinuationOptions.OnlyOnFaulted);
 			return theTask;
 		}
-
 	}
 }

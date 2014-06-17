@@ -1,11 +1,10 @@
 ﻿using System;
-using OneCache.AppFabric;
-using OneCache.SystemTests.Infrastructure.PS;
+using System.Threading;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
-using System.Threading;
+using OneCache.AppFabric.SystemTests.Infrastructure.PS;
 
-namespace OneCache.SystemTests
+namespace OneCache.AppFabric.SystemTests
 {
 	[TestFixture]
 	public class CacheUnavailableTests
@@ -75,9 +74,9 @@ namespace OneCache.SystemTests
 		}
 
 
-		private static DistributedCache GetCacheProvider()
+		private static OneCache.DistributedCache GetCacheProvider()
 		{
-			return new DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
+			return new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
 		}
 	}
 }
