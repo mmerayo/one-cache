@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using log4net;
 
@@ -7,13 +8,13 @@ namespace OneCache
 {
 	internal sealed class DistributedCache : IDistributedCache
 	{
-		private readonly ILog _log;
-		private readonly string _cacheName;
-		private IDistributedCacheFactory _factory;
-		private volatile IDistributedCache _cacheInstance = null;
 		private static readonly TimeSpan TimeSpanZero = new TimeSpan(0);
-		
+		private readonly string _cacheName;
+		private readonly ILog _log;
+
 		private readonly object _syncLock = new object();
+		private volatile IDistributedCache _cacheInstance;
+		private IDistributedCacheFactory _factory;
 
 		public DistributedCache(string cacheName, string productInstanceName, IDistributedCacheFactory factory)
 		{
@@ -27,43 +28,23 @@ namespace OneCache
 			_factory = factory;
 		}
 
-		private IDistributedCache GetCache()
-		{
-			if (_cacheInstance == null)
-				lock (_syncLock)
-					if (_cacheInstance == null)
-						try
-						{
-							_cacheInstance = _factory.GetCache(_cacheName);
-						}
-						catch (InvalidOperationException)
-						{
-							int tries = 5;
-							while (_cacheInstance==null && tries-- > 0)
-								try
-								{
-									_cacheInstance = _factory.GetCache(_cacheName);
-								}
-								catch
-								{
-									Thread.Sleep(TimeSpan.FromSeconds(2));
-								}
-						}
-						catch
-						{
-							_cacheInstance = null;
-						}
-			return _cacheInstance;
-		}
-
 		public void Add(string key, object value)
 		{
-			Add(key,null,value);
+			Add(key, null, value);
+		}
+
+		
+
+		public IEnumerable<object> GetObjectsInRegion(ICacheRegion region)
+		{
+			_log.DebugFormat("GetObjectsInRegion - region={0}",region);
+			var distributedCache = GetCache();
+			return distributedCache.GetObjectsInRegion(region);
 		}
 
 		public void Add(string key, object value, TimeSpan expirationTime)
 		{
-			Add(key,null,value,expirationTime);
+			Add(key, null, value, expirationTime);
 		}
 
 		public void Add(string key, ICacheRegion region, object value)
@@ -85,20 +66,19 @@ namespace OneCache
 				try
 				{
 					if (expirationTime < TimeSpanZero)
-						if(region!=null)
+						if (region != null)
 							distributedCache.Add(key, region, value);
 						else
 							distributedCache.Add(key, value);
+					else if (region != null)
+						distributedCache.Add(key, region, value, expirationTime);
 					else
-						if (region != null)
-							distributedCache.Add(key, region, value, expirationTime);
-						else
-							distributedCache.Add(key,  value, expirationTime);
+						distributedCache.Add(key, value, expirationTime);
 				}
 				catch (Exception e)
 				{
 					_log.ErrorFormat("Exception during distributedCache.Add for key={0}, region={1} Exception={2}",
-									 key, region, e);
+						key, region, e);
 				}
 			}
 			else
@@ -136,7 +116,7 @@ namespace OneCache
 		{
 			IEnumerable<KeyValuePair<string, T>> value;
 
-			TryBulkGet<T>(keys, region, out value);
+			TryBulkGet(keys, region, out value);
 
 			return value;
 		}
@@ -152,10 +132,9 @@ namespace OneCache
 			var distributedCache = GetCache();
 			if (distributedCache == null)
 				return false;
-			
+
 			try
 			{
-
 				value = region != null ? distributedCache.Get<T>(key, region) : distributedCache.Get<T>(key);
 
 				return value != default(T);
@@ -163,9 +142,9 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.Get for key={0}, region={1} Exception={2}",
-								 key,
-								 region,
-								 e);
+					key,
+					region,
+					e);
 				return false;
 			}
 		}
@@ -175,7 +154,8 @@ namespace OneCache
 			return TryGet(key, null, out value);
 		}
 
-		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region, out IEnumerable<KeyValuePair<string, object>> value)
+		public bool TryBulkGet(IEnumerable<string> keys, ICacheRegion region,
+			out IEnumerable<KeyValuePair<string, object>> value)
 		{
 			_log.DebugFormat("TryBulkGet - region={0}", region);
 
@@ -196,44 +176,16 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.BulkGet for region={0} Exception={1}",
-								 region,
-								 e);
+					region,
+					e);
 				return false;
 			}
 		}
-
-		public bool TryBulkGet<T>(IEnumerable<string> keys, ICacheRegion region, out IEnumerable<KeyValuePair<string, T>> value)
-		{
-			_log.DebugFormat("TryBulkGet - region={0}", region);
-
-			ThrowIfDisposed();
-
-			value = null;
-
-			var distributedCache = GetCache();
-			if (distributedCache == null)
-				return false;
-
-			try
-			{
-				value=distributedCache.BulkGet<T>(keys, region);
-
-				return value != null;
-			}
-			catch (Exception e)
-			{
-				_log.ErrorFormat("Exception during distributedCache.TryBulkGet for region={0} Exception={1}",
-								 region,
-								 e);
-				return false;
-			}
-		}
-
 
 
 		public bool Remove(string key, ICacheRegion region = null)
 		{
-			_log.DebugFormat("Remove - key={0}, region={1}", key, region==null ? "null"  :region.ToString());
+			_log.DebugFormat("Remove - key={0}, region={1}", key, region == null ? "null" : region.ToString());
 
 			ThrowIfDisposed();
 			var distributedCache = GetCache();
@@ -246,12 +198,11 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.Remove for key={0}, region={1} Exception={2}",
-								 key,
-								 region,
-								 e);
+					key,
+					region,
+					e);
 				return false;
 			}
-
 		}
 
 		public bool RemoveRegion(ICacheRegion region)
@@ -269,8 +220,8 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.RemoveRegion for region={0}, Message={1}",
-								 region,
-								 e.Message);
+					region,
+					e.Message);
 				return false;
 			}
 		}
@@ -290,19 +241,12 @@ namespace OneCache
 			catch (Exception e)
 			{
 				_log.ErrorFormat("Exception during distributedCache.ClearRegion for region={0}, Message={1}",
-								 region,
-								 e.Message);
+					region,
+					e.Message);
 				return false;
 			}
 		}
 
-		
-
-		private void ThrowIfDisposed()
-		{
-			if (_factory == null)
-				throw new ObjectDisposedException(GetType().FullName);
-		}
 
 		public void Dispose()
 		{
@@ -310,9 +254,73 @@ namespace OneCache
 			GC.SuppressFinalize(this);
 		}
 
+		private IDistributedCache GetCache()
+		{
+			if (_cacheInstance == null)
+				lock (_syncLock)
+					if (_cacheInstance == null)
+						try
+						{
+							_cacheInstance = _factory.GetCache(_cacheName);
+						}
+						catch (InvalidOperationException)
+						{
+							int tries = 5;
+							while (_cacheInstance == null && tries-- > 0)
+								try
+								{
+									_cacheInstance = _factory.GetCache(_cacheName);
+								}
+								catch
+								{
+									Thread.Sleep(TimeSpan.FromSeconds(2));
+								}
+						}
+						catch
+						{
+							_cacheInstance = null;
+						}
+			return _cacheInstance;
+		}
+
+		public bool TryBulkGet<T>(IEnumerable<string> keys, ICacheRegion region,
+			out IEnumerable<KeyValuePair<string, T>> value)
+		{
+			_log.DebugFormat("TryBulkGet - region={0}", region);
+
+			ThrowIfDisposed();
+
+			value = null;
+
+			var distributedCache = GetCache();
+			if (distributedCache == null)
+				return false;
+
+			try
+			{
+				value = distributedCache.BulkGet<T>(keys, region);
+
+				return value != null;
+			}
+			catch (Exception e)
+			{
+				_log.ErrorFormat("Exception during distributedCache.TryBulkGet for region={0} Exception={1}",
+					region,
+					e);
+				return false;
+			}
+		}
+
+		private void ThrowIfDisposed()
+		{
+			if (_factory == null)
+				throw new ObjectDisposedException(GetType().FullName);
+		}
+
 		~DistributedCache()
 		{
-			try{
+			try
+			{
 				Dispose(false);
 			}
 			catch (Exception ex)
@@ -321,7 +329,9 @@ namespace OneCache
 				{
 					_log.Error("Finalizer", ex);
 				}
-				catch { }
+				catch
+				{
+				}
 			}
 		}
 
@@ -336,8 +346,5 @@ namespace OneCache
 							_factory = null;
 						}
 		}
-
-
-		
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using OneCache.AppFabric;
 using Microsoft.ApplicationServer.Caching;
@@ -30,6 +32,23 @@ namespace OneCache.SystemTests
 		{
 			_context.Dispose();
 		}
+
+		
+
+		[Test]
+		public void Can_GetObjectsInRegion()
+		{
+			var target = _context.Sut;
+			
+			var key = GetSomething();
+			string something = GetSomething();
+			target.Add(key, _testRegion, something);
+
+			var actual = target.GetObjectsInRegion(_testRegion);
+			
+			CollectionAssert.Contains(actual, something);
+		}
+
 
 		[Test]
 		public void Add_Null_Should_Swallow_Exception()
