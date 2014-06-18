@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using log4net;
@@ -9,7 +8,6 @@ using OneCache.Infrastructure;
 
 namespace OneCache.AppFabric
 {
-	[DebuggerStepThrough]
 	internal sealed class DistributedCacheFactory : IDistributedCacheFactory
 	{
 		private static readonly TimeSpan TimeBetweenChecks = TimeSpan.FromSeconds(30);

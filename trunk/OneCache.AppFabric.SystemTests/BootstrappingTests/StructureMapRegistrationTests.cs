@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using OneCache.AppFabric.IoC.StructureMap;
@@ -19,9 +20,18 @@ namespace OneCache.AppFabric.SystemTests.BootstrappingTests
 		[Test]
 		public void CanRegisterRegistry()
 		{
-			ObjectFactory.Initialize(c => c.AddRegistry(new CacheRegistry()));
+			InitializeContainer();
 
 			ObjectFactory.AssertConfigurationIsValid();
+		}
+
+		private static void InitializeContainer()
+		{
+			ObjectFactory.Initialize(c =>
+			{
+				string substring = Guid.NewGuid().ToString("N").Substring(0, 10);
+				c.AddRegistry(new CacheRegistry(new ClientCacheConfiguration("SysTest" + substring, "SampleClientId" + substring)));
+			});
 		}
 
 		[Test]
@@ -32,7 +42,7 @@ namespace OneCache.AppFabric.SystemTests.BootstrappingTests
 				"ICacheRegion"
 			};
 
-			ObjectFactory.Initialize(c => c.AddRegistry(new CacheRegistry()));
+			InitializeContainer();
 
 			var publicInterfaces = Assembly.GetAssembly(typeof (CacheRegionProvider)).GetTypes()
 				.Where(x => x.IsPublic && x.IsInterface && !exclusionList.Contains(x.Name));
