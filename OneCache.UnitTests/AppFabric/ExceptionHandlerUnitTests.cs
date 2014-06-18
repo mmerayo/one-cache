@@ -1,7 +1,7 @@
 ﻿using System;
-using OneCache.AppFabric;
 using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
+using OneCache.AppFabric;
 using Ploeh.AutoFixture;
 using Rhino.Mocks;
 
@@ -10,40 +10,6 @@ namespace OneCache.UnitTests.AppFabric
 	[TestFixture]
 	public class ExceptionHandlerUnitTests
 	{
-		[Test]
-		public void WhenMaxRetriesReached_NeedRethrow()
-		{
-			var testContext = new TestContext();
-
-			var target = testContext.Sut;
-
-			HandleExceptionResult result=null;
-			for (int i = 0; i < 5;i++ )
-				result = target.Handle(testContext.GetException(DataCacheErrorCode.RegionAlreadyExists));
-
-
-			Assert.AreEqual(false, result.MustRetry);
-			Assert.AreEqual(true, result.Rethrow);
-		}
-
-		[TestCase(DataCacheErrorCode.RetryLater)]
-		[TestCase(DataCacheErrorCode.RegionAlreadyExists)]
-		[TestCase(DataCacheErrorCode.RegionDoesNotExist)]
-		[TestCase(DataCacheErrorCode.Timeout)]
-		[TestCase(DataCacheErrorCode.ConnectionTerminated)]
-		[TestCase(DataCacheErrorCode.KeyDoesNotExist)]
-		[Test]
-		public void ResultIsExpected_ErroCodeCases(int errorCode)
-		{
-			var testContext = new TestContext();
-
-			var target = testContext.Sut;
-			var result = target.Handle(testContext.GetException(errorCode));
-
-			testContext.AssertResultIsTheExpected(errorCode, result);
-		}
-
-
 		[Test]
 		public void CreatesRegion_WhenRegionDoesNotExists()
 		{
@@ -66,10 +32,43 @@ namespace OneCache.UnitTests.AppFabric
 			testContext.AssertNotifiedUnavaliability();
 		}
 
+		[TestCase(DataCacheErrorCode.RetryLater)]
+		[TestCase(DataCacheErrorCode.RegionAlreadyExists)]
+		[TestCase(DataCacheErrorCode.RegionDoesNotExist)]
+		[TestCase(DataCacheErrorCode.Timeout)]
+		[TestCase(DataCacheErrorCode.ConnectionTerminated)]
+		[TestCase(DataCacheErrorCode.KeyDoesNotExist)]
+		[Test]
+		public void ResultIsExpected_ErroCodeCases(int errorCode)
+		{
+			var testContext = new TestContext();
+
+			var target = testContext.Sut;
+			var result = target.Handle(testContext.GetException(errorCode));
+
+			testContext.AssertResultIsTheExpected(errorCode, result);
+		}
+
+		[Test]
+		public void WhenMaxRetriesReached_NeedRethrow()
+		{
+			var testContext = new TestContext();
+
+			var target = testContext.Sut;
+
+			HandleExceptionResult result = null;
+			for (int i = 0; i < 5; i++)
+				result = target.Handle(testContext.GetException(DataCacheErrorCode.RegionAlreadyExists));
+
+
+			Assert.AreEqual(false, result.MustRetry);
+			Assert.AreEqual(true, result.Rethrow);
+		}
+
 		private class TestContext
 		{
-			private readonly IConnectivityManager _connectivityManager;
 			private readonly DataCacheWrapper _cacheWrapper;
+			private readonly IConnectivityManager _connectivityManager;
 			private readonly Fixture _fixture;
 			private readonly string _regionName;
 
@@ -87,7 +86,7 @@ namespace OneCache.UnitTests.AppFabric
 				{
 					return
 						new ExceptionHandler(OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
-						                                                                        _regionName));
+							_regionName));
 				}
 			}
 
@@ -132,12 +131,9 @@ namespace OneCache.UnitTests.AppFabric
 						break;
 					default:
 						throw new NotImplementedException("Case not implemented");
-
-
 				}
 				Assert.AreEqual(retry, actual.MustRetry);
 				Assert.AreEqual(rethrow, actual.Rethrow);
-
 			}
 		}
 	}

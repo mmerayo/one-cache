@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
 using OneCache.AppFabric;
 using Ploeh.AutoFixture;
@@ -21,10 +20,9 @@ namespace OneCache.UnitTests.AppFabric
 		public void CanExecuteDefaultKeepAlive()
 		{
 			_testContext.WithKeepAlive(false);
-			var target = _testContext.Sut; 
+			var target = _testContext.Sut;
 			target.NotifyUnavailability();
-			Assert.DoesNotThrow(()=>target.CheckIsAvailable());
-
+			Assert.DoesNotThrow(() => target.CheckIsAvailable());
 		}
 
 		[Test]

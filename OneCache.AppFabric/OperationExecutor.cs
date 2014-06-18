@@ -6,22 +6,24 @@ namespace OneCache.AppFabric
 {
 	internal sealed class OperationExecutor<TResult>
 	{
+		private static readonly ILog Logger =
+			LogManager.GetLogger(typeof (OperationExecutor<int>).Namespace + "OperationExecutor");
+
 		private readonly OperationExecutionContext _context;
-		
-		private static readonly ILog Logger = LogManager.GetLogger(typeof(OperationExecutor<int>).Namespace+"OperationExecutor");
+
 		private readonly IExceptionHandler _exceptionHandler;
 		private bool _canExecuteOperation = true;
-		
+
 
 		public OperationExecutor(OperationExecutionContext context,
-			IExceptionHandler exceptionHandler=null)
+			IExceptionHandler exceptionHandler = null)
 		{
 			if (context == null) throw new ArgumentNullException("context");
 			_context = context;
 			_exceptionHandler = exceptionHandler ?? new ExceptionHandler(_context);
 		}
 
-		public TResult Execute(Func<TResult> operation )
+		public TResult Execute(Func<TResult> operation)
 		{
 			Logger.DebugFormat("Execute - Action:{0}", operation);
 			lock (this)
@@ -50,12 +52,13 @@ namespace OneCache.AppFabric
 					if (!res.Rethrow)
 						return default(TResult);
 
-					Logger.ErrorFormat("Execute - Rethrowing Action:{0} Exception:{1}", GetCallerFrame(),ex);
+					Logger.ErrorFormat("Execute - Rethrowing Action:{0} Exception:{1}", GetCallerFrame(), ex);
 					throw;
 				}
 				catch (Exception ex)
 				{
-					Logger.ErrorFormat("Execute -  Rethrowing unhandleable exception. Exception: {0}, Action: {1}", ex,GetCallerFrame());
+					Logger.ErrorFormat("Execute -  Rethrowing unhandleable exception. Exception: {0}, Action: {1}", ex,
+						GetCallerFrame());
 					throw;
 				}
 			}
@@ -64,7 +67,9 @@ namespace OneCache.AppFabric
 		private static string GetCallerFrame()
 		{
 			var stackFrames = new StackTrace().GetFrames();
-			var callerFrame = stackFrames != null && stackFrames.Length >= 3 && stackFrames[2]!=null ? stackFrames[2].ToString() : "null";
+			var callerFrame = stackFrames != null && stackFrames.Length >= 3 && stackFrames[2] != null
+				? stackFrames[2].ToString()
+				: "null";
 			return callerFrame;
 		}
 	}

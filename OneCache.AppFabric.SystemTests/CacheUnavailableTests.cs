@@ -10,12 +10,6 @@ namespace OneCache.AppFabric.SystemTests
 	[TestFixture]
 	public class CacheUnavailableTests
 	{
-		private const string StartCacheClusterCommand = "Start-CacheCluster";
-		private const string StopCacheClusterCommand = "Stop-CacheCluster";
-		private readonly ICacheRegion _testRegion = new CacheRegionProvider().GetByEnum(RegionName.RegionName1);
-
-		
-
 		[TearDown]
 		public void OnTearDown()
 		{
@@ -26,9 +20,21 @@ namespace OneCache.AppFabric.SystemTests
 			}
 			catch
 			{
-				Console.WriteLine("CacheUnavailableTests - OnTearDown. Could not {0}",StartCacheClusterCommand);
+				Console.WriteLine("CacheUnavailableTests - OnTearDown. Could not {0}", StartCacheClusterCommand);
 			}
 		}
+
+		private static OneCache.DistributedCache GetCacheProvider()
+		{
+			return new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix,
+				new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
+		}
+
+		private static string GetSomething()
+		{
+			return Guid.NewGuid().ToString();
+		}
+
 		[Test]
 		public void WhenCacheIsDownCanInvoke_Operation()
 		{
@@ -37,7 +43,7 @@ namespace OneCache.AppFabric.SystemTests
 				AppFabricPowerShell.RunAppFabricCommands(StopCacheClusterCommand);
 				var key = GetSomething();
 
-				Assert.DoesNotThrow(()=>target.Add(key, _testRegion, new object()));
+				Assert.DoesNotThrow(() => target.Add(key, _testRegion, new object()));
 			}
 		}
 
@@ -57,30 +63,22 @@ namespace OneCache.AppFabric.SystemTests
 				//NamespaceSetup.SetUp();
 				//first time wakes up the manager
 				target.Add(key, _testRegion, GetSomething());
-				Assert.IsNull(target.Get<object>(key,_testRegion));
+				Assert.IsNull(target.Get<object>(key, _testRegion));
 				Thread.Sleep(TimeSpan.FromSeconds(31)); //Timespan between checks
 				target.Get<object>(key, _testRegion); //this checks availability
 				Thread.Sleep(3000);
 
 				//second time should be up
 				var expected = GetSomething();
-				target.Add(key, _testRegion,expected);
+				target.Add(key, _testRegion, expected);
 				var actual = target.Get<object>(key, _testRegion);
 				Assert.IsNotNull(actual);
-				Assert.AreEqual(expected,actual);
+				Assert.AreEqual(expected, actual);
 			}
 		}
 
-		private static string GetSomething()
-		{
-			return Guid.NewGuid().ToString();
-		}
-
-
-		private static OneCache.DistributedCache GetCacheProvider()
-		{
-			return new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, new DistributedCacheFactory(new CacheConfiguration(new DataCacheFactoryConfiguration(), false)));
-		}
+		private const string StartCacheClusterCommand = "Start-CacheCluster";
+		private const string StopCacheClusterCommand = "Stop-CacheCluster";
+		private readonly ICacheRegion _testRegion = new CacheRegionProvider().GetByEnum(RegionName.RegionName1);
 	}
 }
-

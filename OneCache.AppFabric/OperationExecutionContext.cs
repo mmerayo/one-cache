@@ -2,7 +2,8 @@
 {
 	internal sealed class OperationExecutionContext
 	{
-		private OperationExecutionContext(IConnectivityManager connectivityManager, DataCacheWrapper cache, string regionName = null)
+		private OperationExecutionContext(IConnectivityManager connectivityManager, DataCacheWrapper cache,
+			string regionName = null)
 		{
 			ConnectivityManager = connectivityManager;
 			RegionName = regionName;
@@ -13,9 +14,10 @@
 		public string RegionName { get; private set; }
 		public DataCacheWrapper Cache { get; private set; }
 
-		public static OperationExecutionContext Create(IConnectivityManager connectivityManager, DataCacheWrapper cache, string regionName)
+		public static OperationExecutionContext Create(IConnectivityManager connectivityManager, DataCacheWrapper cache,
+			string regionName)
 		{
-			return new OperationExecutionContext(connectivityManager, cache,regionName);
+			return new OperationExecutionContext(connectivityManager, cache, regionName);
 		}
 	}
 }
