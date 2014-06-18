@@ -22,6 +22,15 @@ namespace OneCache.UnitTests.AppFabric
 			Assert.DoesNotThrow(() => { var a = _testContext.Sut; });
 		}
 
+		[Test]
+		public void Can_CheckIsAvailable_WhenIsNot()
+		{
+			var target = _testContext.Sut;
+			target.NotifyUnavailability();
+
+			Assert.IsTrue(target.CheckIsAvailable());
+		}
+
 
 		[Test]
 		public void CheckIsAvailable_PerformsKeepAlive_WhenNotAvailable()
@@ -40,8 +49,16 @@ namespace OneCache.UnitTests.AppFabric
 		public void StartsAvailable()
 		{
 			var target = _testContext.Sut;
-
 			Assert.IsTrue(target.CheckIsAvailable());
+		}
+
+		[Test]
+		public void When_PerformsKeepAlive_Fails_ItBecomesUnavailable()
+		{
+			_testContext.WithKeepAlive(true, () => { throw new Exception(); });
+			var target = _testContext.Sut;
+			target.NotifyUnavailability();
+			Assert.IsFalse(target.CheckIsAvailable());
 		}
 
 		private TestContext _testContext;
@@ -55,7 +72,7 @@ namespace OneCache.UnitTests.AppFabric
 
 			public TestContext()
 			{
-				_cacheWrapper = _fixture.Freeze<DataCacheWrapper>(); //MockRepository.GenerateMock<DataCacheWrapper>();
+				_cacheWrapper = _fixture.Freeze<DataCacheWrapper>();
 				OnKeepAliveCalled = new ManualResetEvent(false);
 			}
 
@@ -79,10 +96,10 @@ namespace OneCache.UnitTests.AppFabric
 				OnKeepAliveCalled.Set();
 			}
 
-			public TestContext WithKeepAlive(bool custom)
+			public TestContext WithKeepAlive(bool custom, Action keepAliveAction = null)
 			{
 				_fixture.Register(() => custom
-					? new ConnectivityManager(_cacheWrapper, DoKeepAlive)
+					? new ConnectivityManager(_cacheWrapper, keepAliveAction ?? DoKeepAlive)
 					: new ConnectivityManager(_cacheWrapper));
 				_keepAliveConfigured = true;
 				return this;
