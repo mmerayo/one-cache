@@ -7,7 +7,7 @@ using Rhino.Mocks;
 namespace OneCache.UnitTests.AppFabric
 {
 	[TestFixture]
-	class AppFabricOperationExecutorTests
+	class OperationExecutorTests
 	{
 		[Test]
 		public void CanExecuteSucessfulAction()
