@@ -19,18 +19,13 @@ namespace OneCache.AppFabric
 
 		private bool _isFirstRequest = true; 
 
-		public ConnectivityManager(DataCacheWrapper cacheWrapper)
-		{
-			if (cacheWrapper == null) throw new ArgumentNullException("cacheWrapper");
-			_cacheWrapper = cacheWrapper;
-			_keepAliveAction = DoKeepAlive;
-		}
+		public ConnectivityManager(DataCacheWrapper cacheWrapper):this(cacheWrapper,null){}
 
 		public ConnectivityManager(DataCacheWrapper cacheWrapper,Action onDoKeepAlive)
 		{
 			if (cacheWrapper == null) throw new ArgumentNullException("cacheWrapper");
 			_cacheWrapper = cacheWrapper;
-			_keepAliveAction = onDoKeepAlive;
+			_keepAliveAction = onDoKeepAlive ?? DoKeepAlive;
 		}
 
 		public void NotifyUnavailability()

@@ -7,7 +7,7 @@ using Rhino.Mocks;
 namespace OneCache.UnitTests.AppFabric
 {
 	[TestFixture]
-	public class AppFabricDistributedCacheUnitTests
+	public class DistributedCacheUnitTests
 	{
 		[Test,Theory]
 		public void CanAdd( bool connectivityAvailable)

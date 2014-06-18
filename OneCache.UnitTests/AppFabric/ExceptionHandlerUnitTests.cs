@@ -8,7 +8,7 @@ using Rhino.Mocks;
 namespace OneCache.UnitTests.AppFabric
 {
 	[TestFixture]
-	public class AppFabricExceptionHandlerUnitTests
+	public class ExceptionHandlerUnitTests
 	{
 		[Test]
 		public void WhenMaxRetriesReached_NeedRethrow()
