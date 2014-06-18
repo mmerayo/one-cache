@@ -23,7 +23,7 @@ namespace OneCache
 		IEnumerable<KeyValuePair<string, T>> BulkGet<T>(IEnumerable<string> keys, ICacheRegion region);
 
 		void Add(string key, object value);
-		
+
 		IEnumerable<object> GetObjectsInRegion(ICacheRegion region);
 	}
 }

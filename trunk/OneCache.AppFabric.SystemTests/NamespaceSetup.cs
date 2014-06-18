@@ -15,7 +15,6 @@ namespace OneCache.AppFabric.SystemTests
 		[SetUp]
 		public static void SetUp()
 		{
-
 			Console.WriteLine(AppFabricPowerShell.RunAppFabricCommands("new-cache " + CacheName));
 
 			for (int retries = 0;; retries++)
@@ -42,7 +41,7 @@ namespace OneCache.AppFabric.SystemTests
 		private static void GetCache_Should_Retrieve_Cache_Client(DistributedCacheFactory factory)
 		{
 #pragma warning disable 642
-			using (new OneCache.DistributedCache(NamespaceSetup.CacheName, NamespaceSetup.ProductInstancePrefix, factory)) ;
+			using (new OneCache.DistributedCache(CacheName, ProductInstancePrefix, factory)) ;
 #pragma warning restore 642
 		}
 	}

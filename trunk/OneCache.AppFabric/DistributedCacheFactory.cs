@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using OneCache.Infrastructure;
-using Microsoft.ApplicationServer.Caching;
 using log4net;
+using Microsoft.ApplicationServer.Caching;
+using OneCache.Infrastructure;
 
 namespace OneCache.AppFabric
 {
@@ -13,12 +13,14 @@ namespace OneCache.AppFabric
 	internal sealed class DistributedCacheFactory : IDistributedCacheFactory
 	{
 		private static readonly TimeSpan TimeBetweenChecks = TimeSpan.FromSeconds(30);
-		private readonly ICacheConfiguration<DataCacheFactoryConfiguration> _configuration;
 		private static readonly ILog Logger = LogManager.GetLogger(typeof (DistributedCacheFactory));
+		private readonly Dictionary<string, DistributedCache> _caches = new Dictionary<string, DistributedCache>();
+		private readonly ICacheConfiguration<DataCacheFactoryConfiguration> _configuration;
+		private readonly object _syncLock = new object();
+		private bool _disposed;
+		private volatile DataCacheFactory _factory;
 		private DateTime _lastCheck = DateTime.MinValue;
-		private volatile DataCacheFactory _factory=null;
-		private readonly object _syncLock=new object();
-		
+
 
 		public DistributedCacheFactory(ICacheConfiguration<DataCacheFactoryConfiguration> configuration)
 		{
@@ -28,63 +30,19 @@ namespace OneCache.AppFabric
 
 			if (realConfiguration == null)
 				throw new InvalidOperationException(string.Format("argument must be of type {0}",
-				                                                  typeof (DataCacheFactoryConfiguration).FullName));
+					typeof (DataCacheFactoryConfiguration).FullName));
 
-			Logger.DebugFormat("Connecting to App Fabric on {0}...", string.Join(", ", realConfiguration.Servers.Select(s => s.HostName + ":" + s.CachePort)));
+			Logger.DebugFormat("Connecting to App Fabric on {0}...",
+				string.Join(", ", realConfiguration.Servers.Select(s => s.HostName + ":" + s.CachePort)));
 
-			if(configuration.ConnectOnStartUp)
+			if (configuration.ConnectOnStartUp)
 				DoGetFactory();
-			
 		}
 
-		public DistributedCacheFactory(bool connectOnStartUp=false)
-			: this(new CacheConfiguration(new DataCacheFactoryConfiguration(),connectOnStartUp))
+		public DistributedCacheFactory(bool connectOnStartUp = false)
+			: this(new CacheConfiguration(new DataCacheFactoryConfiguration(), connectOnStartUp))
 		{
 		}
-
-		private DataCacheFactory GetFactory()
-		{
-			if (_factory != null)
-				return _factory;
-
-			if (DateTime.UtcNow.Subtract(_lastCheck) > TimeBetweenChecks)
-				lock (_syncLock)
-					if (DateTime.UtcNow.Subtract(_lastCheck) > TimeBetweenChecks)
-					{
-						try
-						{
-							Task.Factory.StartNew(DoGetFactory).LogTaskException(Logger);
-						}
-						catch (Exception ex)
-						{
-							Logger.Error("GetFactory - Could not get AppFabric factory", ex);
-						}
-						_lastCheck = DateTime.UtcNow;
-					}
-
-			return null;
-		}
-
-
-		private void DoGetFactory()
-		{
-			try
-			{
-				if (_factory == null)
-					lock(_syncLock)
-						if(_factory==null)
-							_factory = new DataCacheFactory(_configuration.Object);
-			}
-			catch (Exception ex)
-			{
-				Logger.Warn("Could not establish a connection to AppFabric. Please verify the service is UP", ex);
-				throw;
-			}
-		}
-
-		
-
-		private readonly Dictionary<string,DistributedCache> _caches=new Dictionary<string, DistributedCache>();
 
 		public IDistributedCache GetCache(string cacheName)
 		{
@@ -119,15 +77,6 @@ namespace OneCache.AppFabric
 			return _caches[cacheName];
 		}
 
-		private bool _disposed = false;
-
-		private void ThrowIfDisposed()
-		{
-			if (_disposed)
-				throw new ObjectDisposedException(GetType().FullName);
-		}
-
-
 		public void Dispose()
 		{
 			ThrowIfDisposed();
@@ -136,19 +85,70 @@ namespace OneCache.AppFabric
 			GC.SuppressFinalize(this);
 		}
 
+		private DataCacheFactory GetFactory()
+		{
+			if (_factory != null)
+				return _factory;
+
+			if (DateTime.UtcNow.Subtract(_lastCheck) > TimeBetweenChecks)
+				lock (_syncLock)
+					if (DateTime.UtcNow.Subtract(_lastCheck) > TimeBetweenChecks)
+					{
+						try
+						{
+							Task.Factory.StartNew(DoGetFactory).LogTaskException(Logger);
+						}
+						catch (Exception ex)
+						{
+							Logger.Error("GetFactory - Could not get AppFabric factory", ex);
+						}
+						_lastCheck = DateTime.UtcNow;
+					}
+
+			return null;
+		}
+
+
+		private void DoGetFactory()
+		{
+			try
+			{
+				if (_factory == null)
+					lock (_syncLock)
+						if (_factory == null)
+							_factory = new DataCacheFactory(_configuration.Object);
+			}
+			catch (Exception ex)
+			{
+				Logger.Warn("Could not establish a connection to AppFabric. Please verify the service is UP", ex);
+				throw;
+			}
+		}
+
+
+		private void ThrowIfDisposed()
+		{
+			if (_disposed)
+				throw new ObjectDisposedException(GetType().FullName);
+		}
+
+
 		~DistributedCacheFactory()
 		{
-		    try
-		    {
-		        Dispose(false);
-		    }
-		    catch (Exception ex)
-		    {
-		        try
-		        {
-		            Logger.Error("Finalizer", ex);
-		        }catch{}
-		    }
+			try
+			{
+				Dispose(false);
+			}
+			catch (Exception ex)
+			{
+				try
+				{
+					Logger.Error("Finalizer", ex);
+				}
+				catch
+				{
+				}
+			}
 		}
 
 		private void Dispose(bool disposing)

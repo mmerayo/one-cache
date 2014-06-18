@@ -3,9 +3,12 @@ using Microsoft.ApplicationServer.Caching;
 
 namespace OneCache.AppFabric
 {
-	internal sealed class CacheConfiguration: ICacheConfiguration<DataCacheFactoryConfiguration>
+	internal sealed class CacheConfiguration : ICacheConfiguration<DataCacheFactoryConfiguration>
 	{
-		public CacheConfiguration(DataCacheFactoryConfiguration configuration):this(configuration,false){}
+		public CacheConfiguration(DataCacheFactoryConfiguration configuration) : this(configuration, false)
+		{
+		}
+
 		internal CacheConfiguration(DataCacheFactoryConfiguration configuration, bool connectOnStartUp)
 		{
 			if (configuration == null) throw new ArgumentNullException("configuration");

@@ -12,7 +12,19 @@ namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 		private Runspace _runspace;
 
 		/// <summary>
-		/// Opens the shell.
+		///     Disposes the shell.
+		/// </summary>
+		public void Dispose()
+		{
+			if (_runspace != null)
+			{
+				_runspace.Close();
+				_runspace = null;
+			}
+		}
+
+		/// <summary>
+		///     Opens the shell.
 		/// </summary>
 		public void Open()
 		{
@@ -21,7 +33,7 @@ namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 		}
 
 		/// <summary>
-		/// Executes a list of commands.
+		///     Executes a list of commands.
 		/// </summary>
 		/// <param name="commands">The list of commands to execute.</param>
 		/// <returns>The script (NOT file path) to execute.</returns>
@@ -59,7 +71,7 @@ namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 		}
 
 		/// <summary>
-		/// Executes a snippet of PowerShell script.
+		///     Executes a snippet of PowerShell script.
 		/// </summary>
 		/// <param name="script">Script snippet.</param>
 		/// <returns>Execution output text.</returns>
@@ -71,19 +83,7 @@ namespace OneCache.AppFabric.SystemTests.Infrastructure.PS
 
 				var scriptCommand = new Command(script, true);
 
-				return shell.Execute(new[] { scriptCommand });
-			}
-		}
-
-		/// <summary>
-		/// Disposes the shell.
-		/// </summary>
-		public void Dispose()
-		{
-			if (_runspace != null)
-			{
-				_runspace.Close();
-				_runspace = null;
+				return shell.Execute(new[] {scriptCommand});
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿using System;
-using OneCache.AppFabric;
 using NUnit.Framework;
+using OneCache.AppFabric;
 using Ploeh.AutoFixture;
 using Rhino.Mocks;
 
@@ -9,8 +9,8 @@ namespace OneCache.UnitTests.AppFabric
 	[TestFixture]
 	public class DistributedCacheUnitTests
 	{
-		[Test,Theory]
-		public void CanAdd( bool connectivityAvailable)
+		[Test, Theory]
+		public void CanAdd(bool connectivityAvailable)
 		{
 			var testContext = new TestContext().WithConnectivityAvailable(connectivityAvailable);
 
@@ -29,25 +29,9 @@ namespace OneCache.UnitTests.AppFabric
 
 			var target = testContext.Sut;
 
-			target.Add(testContext.Key, testContext.Region, testContext.Value,testContext.ExpirationTime);
+			target.Add(testContext.Key, testContext.Region, testContext.Value, testContext.ExpirationTime);
 
 			testContext.AssertAddWithExpirationWasCalled(connectivityAvailable);
-		}
-
-		[Test, Theory]
-		public void CanTryGet(bool connectivityAvailable)
-		{
-			var testContext = new TestContext().WithConnectivityAvailable(connectivityAvailable);
-
-			var target = testContext.Sut;
-
-			object actualValue;
-			target.TryGet(testContext.Key, testContext.Region,out actualValue);
-			
-			if(connectivityAvailable)
-				Assert.AreSame(testContext.Value,actualValue);
-
-			testContext.AssertTryGetWasCalled(connectivityAvailable);
 		}
 
 		[Test, Theory]
@@ -72,6 +56,22 @@ namespace OneCache.UnitTests.AppFabric
 			target.RemoveRegion(testContext.Region);
 
 			testContext.AssertRemoveRegionWasCalled(connectivityAvailable);
+		}
+
+		[Test, Theory]
+		public void CanTryGet(bool connectivityAvailable)
+		{
+			var testContext = new TestContext().WithConnectivityAvailable(connectivityAvailable);
+
+			var target = testContext.Sut;
+
+			object actualValue;
+			target.TryGet(testContext.Key, testContext.Region, out actualValue);
+
+			if (connectivityAvailable)
+				Assert.AreSame(testContext.Value, actualValue);
+
+			testContext.AssertTryGetWasCalled(connectivityAvailable);
 		}
 
 		private class TestContext

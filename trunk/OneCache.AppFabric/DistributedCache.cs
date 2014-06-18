@@ -23,7 +23,7 @@ namespace OneCache.AppFabric
 
 		public void Add(string key, object value, TimeSpan expirationTime)
 		{
-			Add(key,null,value,expirationTime);
+			Add(key, null, value, expirationTime);
 		}
 
 		public void Add(string key, ICacheRegion region, object value)
@@ -39,7 +39,8 @@ namespace OneCache.AppFabric
 			OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
 				RegionKey(region));
 			var executor = new OperationExecutor<DataCacheItemVersion>(context);
-			executor.Execute(() => region!=null? _cacheWrapper.Put(key, value, RegionKey(region)):_cacheWrapper.Put(key, value));
+			executor.Execute(
+				() => region != null ? _cacheWrapper.Put(key, value, RegionKey(region)) : _cacheWrapper.Put(key, value));
 		}
 
 
@@ -75,11 +76,11 @@ namespace OneCache.AppFabric
 			return Get<T>(key, null);
 		}
 
-		public IEnumerable<KeyValuePair<string,object>> BulkGet(IEnumerable<string> keys, ICacheRegion region) 
+		public IEnumerable<KeyValuePair<string, object>> BulkGet(IEnumerable<string> keys, ICacheRegion region)
 		{
 			Log.DebugFormat("BulkGet: region={0}", region);
 
-			IEnumerable<KeyValuePair<string,object>> value;
+			IEnumerable<KeyValuePair<string, object>> value;
 
 			TryBulkGet(keys, region, out value);
 
@@ -88,8 +89,8 @@ namespace OneCache.AppFabric
 
 		public IEnumerable<KeyValuePair<string, T>> BulkGet<T>(IEnumerable<string> keys, ICacheRegion region)
 		{
-			Log.DebugFormat("BulkGet<{1}>: region={0}", region,typeof(T));
-			var candidates=BulkGet(keys, region);
+			Log.DebugFormat("BulkGet<{1}>: region={0}", region, typeof (T));
+			var candidates = BulkGet(keys, region);
 
 			return
 				candidates.Where(x => x.Value is T).Select(x => new KeyValuePair<string, T>(x.Key, (T) x.Value));
@@ -97,14 +98,14 @@ namespace OneCache.AppFabric
 
 		public void Add(string key, object value)
 		{
-			Add(key,null,value);
+			Add(key, null, value);
 		}
 
 		public IEnumerable<object> GetObjectsInRegion(ICacheRegion region)
 		{
 			var context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper, null);
 			var executor = new OperationExecutor<IEnumerable<object>>(context);
-			return executor.Execute(() => _cacheWrapper.GetObjectsInRegion(RegionKey(region)).Select(x=>x.Value));
+			return executor.Execute(() => _cacheWrapper.GetObjectsInRegion(RegionKey(region)).Select(x => x.Value));
 		}
 
 
@@ -118,7 +119,8 @@ namespace OneCache.AppFabric
 				OperationExecutionContext context = OperationExecutionContext.Create(_connectivityManager, _cacheWrapper,
 					RegionKey(region));
 				var executor = new OperationExecutor<object>(context);
-				storedValue = executor.Execute(() =>region!=null? _cacheWrapper.Get(key, RegionKey(region)):_cacheWrapper.Get(key));
+				storedValue =
+					executor.Execute(() => region != null ? _cacheWrapper.Get(key, RegionKey(region)) : _cacheWrapper.Get(key));
 			}
 			else
 			{

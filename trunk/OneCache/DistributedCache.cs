@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using log4net;
 
@@ -33,11 +32,10 @@ namespace OneCache
 			Add(key, null, value);
 		}
 
-		
 
 		public IEnumerable<object> GetObjectsInRegion(ICacheRegion region)
 		{
-			_log.DebugFormat("GetObjectsInRegion - region={0}",region);
+			_log.DebugFormat("GetObjectsInRegion - region={0}", region);
 			var distributedCache = GetCache();
 			return distributedCache.GetObjectsInRegion(region);
 		}

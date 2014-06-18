@@ -1,13 +1,12 @@
 ﻿using System;
-using OneCache.AppFabric;
-using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
+using OneCache.AppFabric;
 using Rhino.Mocks;
 
 namespace OneCache.UnitTests.AppFabric
 {
 	[TestFixture]
-	class OperationExecutorTests
+	internal class OperationExecutorTests
 	{
 		[Test]
 		public void CanExecuteSucessfulAction()
@@ -28,22 +27,6 @@ namespace OneCache.UnitTests.AppFabric
 		}
 
 		[Test]
-		public void HandlesAppFabricExceptions()
-		{
-			var testContext = new TestContext<string>()
-				.WithAppFabricException(false,false);
-
-			var target = testContext.Sut;
-
-			string actual = null;
-			Assert.DoesNotThrow(() => actual = target.Execute(testContext.OperationToExecute));
-
-			testContext.AssertErrorHandlingWasNeeded();
-
-			Assert.IsNull(actual);
-		}
-
-		[Test]
 		public void CannotReuseInstance()
 		{
 			const string expectedResult = "To Anonymous";
@@ -55,6 +38,22 @@ namespace OneCache.UnitTests.AppFabric
 			Assert.DoesNotThrow(() => target.Execute(testContext.OperationToExecute));
 			Assert.Throws<NotSupportedException>(() => target.Execute(testContext.OperationToExecute));
 			testContext.AssertNoErrorHandlingWasNeeded();
+		}
+
+		[Test]
+		public void HandlesAppFabricExceptions()
+		{
+			var testContext = new TestContext<string>()
+				.WithAppFabricException(false, false);
+
+			var target = testContext.Sut;
+
+			string actual = null;
+			Assert.DoesNotThrow(() => actual = target.Execute(testContext.OperationToExecute));
+
+			testContext.AssertErrorHandlingWasNeeded();
+
+			Assert.IsNull(actual);
 		}
 
 		[Test]
@@ -75,14 +74,14 @@ namespace OneCache.UnitTests.AppFabric
 		{
 			const int times = 2;
 			var testContext = new TestContext<int>()
-				.WithAppFabricException(true, false,times);
+				.WithAppFabricException(true, false, times);
 
 			var target = testContext.Sut;
 
 			Assert.Throws<NullReferenceException>(() => target.Execute(testContext.OperationToExecute));
 
 			//The time +1  is when is not expected and rethrows
-			testContext.AssertErrorHandlingWasNeeded(times+1);
+			testContext.AssertErrorHandlingWasNeeded(times + 1);
 		}
 
 		[Test]
@@ -94,18 +93,18 @@ namespace OneCache.UnitTests.AppFabric
 			var target = testContext.Sut;
 
 			var actual = 0;
-			Assert.DoesNotThrow(() => actual= target.Execute(testContext.OperationToExecute));
+			Assert.DoesNotThrow(() => actual = target.Execute(testContext.OperationToExecute));
 
 			testContext.AssertErrorHandlingWasNeeded();
 
-			Assert.AreEqual(default(int),actual);
+			Assert.AreEqual(default(int), actual);
 		}
 
 
 		private class TestContext<TResult>
 		{
-			private IExceptionHandler _exceptionHandler;
-			private DataCacheExceptionWrapper _theException;
+			private readonly IExceptionHandler _exceptionHandler;
+			private readonly DataCacheExceptionWrapper _theException;
 			private Func<TResult> _operation;
 
 			public TestContext()
@@ -118,7 +117,7 @@ namespace OneCache.UnitTests.AppFabric
 			{
 				get
 				{
-					var result = new OperationExecutor<TResult>(OperationExecutionContext.Create(null,null,null), _exceptionHandler);
+					var result = new OperationExecutor<TResult>(OperationExecutionContext.Create(null, null, null), _exceptionHandler);
 					return result;
 				}
 			}
@@ -129,11 +128,10 @@ namespace OneCache.UnitTests.AppFabric
 				return this;
 			}
 
-			public TestContext<TResult> WithAppFabricException(bool needRetry, bool rethrow, int times=1)
+			public TestContext<TResult> WithAppFabricException(bool needRetry, bool rethrow, int times = 1)
 			{
 				_exceptionHandler.Expect(x => x.Handle(Arg<DataCacheExceptionWrapper>.Is.Anything))
-				                 .Return(new HandleExceptionResult(needRetry, rethrow)).Repeat.Times(times);
-
+					.Return(new HandleExceptionResult(needRetry, rethrow)).Repeat.Times(times);
 
 
 				_operation = () => { throw _theException; };
@@ -150,23 +148,21 @@ namespace OneCache.UnitTests.AppFabric
 			{
 				return _operation();
 			}
+
 			public void AssertNoErrorHandlingWasNeeded()
 			{
-				_exceptionHandler.AssertWasNotCalled(x=>x.Handle(Arg<DataCacheExceptionWrapper>.Is.Anything));
+				_exceptionHandler.AssertWasNotCalled(x => x.Handle(Arg<DataCacheExceptionWrapper>.Is.Anything));
 			}
 
-			public void AssertErrorHandlingWasNeeded(int times=1)
+			public void AssertErrorHandlingWasNeeded(int times = 1)
 			{
 				_exceptionHandler.AssertWasCalled(x => x.Handle(_theException),
-				                                  options => options.Repeat.Times(times));
+					options => options.Repeat.Times(times));
 			}
-
-			
 		}
 
-		private class TestException:Exception
+		private class TestException : Exception
 		{
-			
 		}
 	}
 }

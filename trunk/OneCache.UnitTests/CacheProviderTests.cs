@@ -9,10 +9,36 @@ namespace OneCache.UnitTests
 	[TestFixture]
 	public class CacheProviderTests
 	{
-		private enum RegionName
+		[Test]
+		public void AddNullItem_DoesNotThrow()
 		{
-			Product,
-			Currencies
+			object value;
+			string key;
+			ICacheRegion region;
+			var testContext = new TestContext()
+				.With(out key, out value, out region);
+
+			value = null;
+
+			var sut = testContext.Sut;
+
+			Assert.DoesNotThrow(() => sut.Add(key, region, value));
+		}
+
+		[Test]
+		public void AddNullItem_RemovesItem_IfExists()
+		{
+			object value;
+			string key;
+			ICacheRegion region;
+			var testContext = new TestContext()
+				.With(out key, out value, out region);
+
+			var sut = testContext.Sut;
+
+			sut.Add(key, region, null);
+
+			testContext.AssertRemoveItemWasCalled(key, region);
 		}
 
 		[Test]
@@ -49,38 +75,6 @@ namespace OneCache.UnitTests
 		}
 
 		[Test]
-		public void AddNullItem_DoesNotThrow()
-		{
-			object value;
-			string key;
-			ICacheRegion region;
-			var testContext = new TestContext()
-				.With(out key, out value, out region);
-
-			value = null;
-
-			var sut = testContext.Sut;
-
-			Assert.DoesNotThrow(() => sut.Add(key, region, value));
-		}
-
-		[Test]
-		public void AddNullItem_RemovesItem_IfExists()
-		{
-			object value;
-			string key;
-			ICacheRegion region;
-			var testContext = new TestContext()
-				.With(out key, out value, out region);
-
-			var sut = testContext.Sut;
-
-			sut.Add(key, region, null);
-
-			testContext.AssertRemoveItemWasCalled(key, region);
-		}
-
-		[Test]
 		public void CanGetItem()
 		{
 			object value;
@@ -104,13 +98,13 @@ namespace OneCache.UnitTests
 			object value;
 			string key;
 			ICacheRegion region;
-			
+
 			var testContext = new TestContext()
 				.WithItem(out key, out value, out region);
 
 			var sut = testContext.Sut;
 
-			region =  testContext.CacheRegionProvider.GetByEnum(RegionName.Currencies);
+			region = testContext.CacheRegionProvider.GetByEnum(RegionName.Currencies);
 			var actual = sut.Get<object>(key, region);
 
 			testContext.AssertGetWasCalled<object>(key, region);
@@ -154,9 +148,27 @@ namespace OneCache.UnitTests
 			Assert.Throws<ObjectDisposedException>(() => sut.RemoveRegion(region));
 		}
 
+		private enum RegionName
+		{
+			Product,
+			Currencies
+		}
+
 		private class TestContext
 		{
 			private readonly IFixture _fixture;
+
+			public TestContext()
+			{
+				_fixture = new Fixture();
+
+				CacheName = _fixture.CreateAnonymous<string>();
+				ProductInstanceName = _fixture.CreateAnonymous<string>();
+				Factory = MockRepository.GenerateMock<IDistributedCacheFactory>();
+				DistributedCache = MockRepository.GenerateMock<IDistributedCache>();
+				Factory.Stub(x => x.GetCache(CacheName)).Return(DistributedCache);
+				CacheRegionProvider = new CacheRegionProvider();
+			}
 
 			public DistributedCache Sut
 			{
@@ -173,18 +185,6 @@ namespace OneCache.UnitTests
 
 			public ICacheRegionProvider CacheRegionProvider { get; private set; }
 
-			public TestContext()
-			{
-				_fixture = new Fixture();
-
-				CacheName = _fixture.CreateAnonymous<string>();
-				ProductInstanceName = _fixture.CreateAnonymous<string>();
-				Factory = MockRepository.GenerateMock<IDistributedCacheFactory>();
-				DistributedCache = MockRepository.GenerateMock<IDistributedCache>();
-				Factory.Stub(x => x.GetCache(CacheName)).Return(DistributedCache);
-				CacheRegionProvider=new CacheRegionProvider();
-			}
-
 
 			public TestContext With<TValue>(out string key, out TValue value, out ICacheRegion region)
 			{
@@ -192,7 +192,8 @@ namespace OneCache.UnitTests
 				return With(out key, out value, out region, out expirationTime);
 			}
 
-			public TestContext With<TValue>(out string key, out TValue value, out ICacheRegion region, out TimeSpan expirationTime)
+			public TestContext With<TValue>(out string key, out TValue value, out ICacheRegion region,
+				out TimeSpan expirationTime)
 			{
 				var localKey = _fixture.CreateAnonymous<string>();
 				var localValue = _fixture.CreateAnonymous<TValue>();
@@ -220,25 +221,25 @@ namespace OneCache.UnitTests
 			public void AssertAddWasCalled<TValue>(string key, TValue value, ICacheRegion region)
 			{
 				DistributedCache.AssertWasCalled(x => x.Add(key, region, value),
-				                              options => options.Repeat.AtLeastOnce());
+					options => options.Repeat.AtLeastOnce());
 			}
 
 			public void AssertAddWasCalled<TValue>(string key, TValue value, TimeSpan expirationTime, ICacheRegion region)
 			{
 				DistributedCache.AssertWasCalled(x => x.Add(key, region, value, expirationTime),
-				                              options => options.Repeat.AtLeastOnce());
+					options => options.Repeat.AtLeastOnce());
 			}
 
 			public void AssertRemoveItemWasCalled(string key, ICacheRegion region = null)
 			{
 				DistributedCache.AssertWasCalled(x => x.Remove(key, region),
-				                              options => options.Repeat.AtLeastOnce());
+					options => options.Repeat.AtLeastOnce());
 			}
 
 			public void AssertGetWasCalled<TValue>(string key, ICacheRegion region) where TValue : class
 			{
 				DistributedCache.AssertWasCalled(x => x.Get<TValue>(key, region),
-				                              options => options.Repeat.AtLeastOnce());
+					options => options.Repeat.AtLeastOnce());
 			}
 		}
 	}

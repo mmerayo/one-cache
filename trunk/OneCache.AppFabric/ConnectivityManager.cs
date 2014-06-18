@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OneCache.Infrastructure;
 using log4net;
+using OneCache.Infrastructure;
 
 namespace OneCache.AppFabric
 {
@@ -10,18 +10,20 @@ namespace OneCache.AppFabric
 	{
 		private static readonly object SyncLock = new object();
 		private static readonly TimeSpan TimeBetweenChecks = TimeSpan.FromSeconds(30);
-		
-		private DateTime _lastCheck = DateTime.MinValue;
-		private volatile bool _isAvailable = true;
+
+		private static readonly ILog Logger = LogManager.GetLogger(typeof (ConnectivityManager));
 		private readonly DataCacheWrapper _cacheWrapper;
-		private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectivityManager));
 		private readonly Action _keepAliveAction;
+		private volatile bool _isAvailable = true;
 
-		private bool _isFirstRequest = true; 
+		private bool _isFirstRequest = true;
+		private DateTime _lastCheck = DateTime.MinValue;
 
-		public ConnectivityManager(DataCacheWrapper cacheWrapper):this(cacheWrapper,null){}
+		public ConnectivityManager(DataCacheWrapper cacheWrapper) : this(cacheWrapper, null)
+		{
+		}
 
-		public ConnectivityManager(DataCacheWrapper cacheWrapper,Action onDoKeepAlive)
+		public ConnectivityManager(DataCacheWrapper cacheWrapper, Action onDoKeepAlive)
 		{
 			if (cacheWrapper == null) throw new ArgumentNullException("cacheWrapper");
 			_cacheWrapper = cacheWrapper;
@@ -48,14 +50,14 @@ namespace OneCache.AppFabric
 							{
 								Logger.Error("CheckIsAvailable - Could not perform AppFabric availability", ex);
 							}
-							
+
 							//The component tries always to process the first request since it was loaded in the application domain
 							if (_isFirstRequest)
 							{
 								int numRetriesFirstConnection = 10;
 								while (!_isAvailable && numRetriesFirstConnection-- > 0)
 									Thread.Sleep(TimeSpan.FromMilliseconds(250));
-								
+
 								_isFirstRequest = false;
 							}
 							_lastCheck = DateTime.UtcNow;
@@ -75,7 +77,7 @@ namespace OneCache.AppFabric
 			catch (Exception ex)
 			{
 				NotifyUnavailability();
-				Logger.Warn("PerformKeepAlive - AppFabric is not available",ex);
+				Logger.Warn("PerformKeepAlive - AppFabric is not available", ex);
 			}
 		}
 
