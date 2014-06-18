@@ -50,7 +50,7 @@ namespace OneCache.AppFabric
 							}
 							
 							//The component tries always to process the first request since it was loaded in the application domain
-							if (!_isFirstRequest)
+							if (_isFirstRequest)
 							{
 								int numRetriesFirstConnection = 10;
 								while (!_isAvailable && numRetriesFirstConnection-- > 0)
