@@ -96,13 +96,15 @@
     <Compile Include="DistributedCacheFactory.cs" />
     <Compile Include="DistributedCache.cs" />
     <Compile Include="ExceptionHandler.cs" />
+    <Compile Include="Configuration\ClientCacheConfiguration.cs" />
+    <Compile Include="Configuration\EndPointConfiguration.cs" />
     <Compile Include="OperationExecutionContext.cs" />
     <Compile Include="OperationExecutor.cs" />
     <Compile Include="HandleExceptionResult.cs" />
     <Compile Include="IConnectivityManager.cs" />
     <Compile Include="IExceptionHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IoC\StructureMap\CacheRegistry.cs" />
+    <Compile Include="Configuration\StructureMap\CacheRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

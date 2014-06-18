@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-using OneCache.AppFabric.IoC.StructureMap;
+using OneCache.AppFabric.Configuration;
+using OneCache.AppFabric.Configuration.StructureMap;
 using OneCache.Regions;
 using StructureMap;
 
@@ -30,7 +31,10 @@ namespace OneCache.AppFabric.SystemTests.BootstrappingTests
 			ObjectFactory.Initialize(c =>
 			{
 				string substring = Guid.NewGuid().ToString("N").Substring(0, 10);
-				c.AddRegistry(new CacheRegistry(new ClientCacheConfiguration("SysTest" + substring, "SampleClientId" + substring)));
+				var clientCacheConfiguration = new ClientCacheConfiguration("SysTest" + substring, "SampleClientId" + substring);
+				clientCacheConfiguration.EndPoints.Add(new EndPointConfiguration("localhost",22233));
+				c.AddRegistry(new CacheRegistry(clientCacheConfiguration));
+
 			});
 		}
 
