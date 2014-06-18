@@ -78,6 +78,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheException.cs" />
     <Compile Include="DistributedCache.cs" />
     <Compile Include="Infrastructure\IoC\StructureMapBaseRegistry.cs" />
     <Compile Include="Regions\CacheRegionProvider.cs" />
