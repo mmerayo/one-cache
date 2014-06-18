@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading;
+using Microsoft.ApplicationServer.Caching;
 using NUnit.Framework;
 using OneCache.AppFabric;
 using Ploeh.AutoFixture;
+using Rhino.Mocks;
 
 namespace OneCache.UnitTests.AppFabric
 {
@@ -16,10 +18,13 @@ namespace OneCache.UnitTests.AppFabric
 		}
 
 		[Test]
-		public void CanBeCreated_WithDefaultKeepAlive()
+		public void CanExecuteDefaultKeepAlive()
 		{
 			_testContext.WithKeepAlive(false);
-			Assert.DoesNotThrow(() => { var a = _testContext.Sut; });
+			var target = _testContext.Sut; 
+			target.NotifyUnavailability();
+			Assert.DoesNotThrow(()=>target.CheckIsAvailable());
+
 		}
 
 		[Test]
@@ -72,7 +77,8 @@ namespace OneCache.UnitTests.AppFabric
 
 			public TestContext()
 			{
-				_cacheWrapper = _fixture.Freeze<DataCacheWrapper>();
+				_cacheWrapper = MockRepository.GenerateStub<DataCacheWrapper>();
+				//_cacheWrapper.Expect(x => x.Add(Arg<string>.Is.Anything, Arg<object>.Is.Anything));
 				OnKeepAliveCalled = new ManualResetEvent(false);
 			}
 
