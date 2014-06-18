@@ -104,7 +104,7 @@ namespace OneCache.UnitTests
 
 			var sut = testContext.Sut;
 
-			region = testContext.CacheRegionProvider.GetByEnum(RegionName.Currencies);
+			region = testContext.CacheRegionProvider.GetByEnum(RegionName.Region2);
 			var actual = sut.Get<object>(key, region);
 
 			testContext.AssertGetWasCalled<object>(key, region);
@@ -150,8 +150,8 @@ namespace OneCache.UnitTests
 
 		private enum RegionName
 		{
-			Product,
-			Currencies
+			Region1,
+			Region2
 		}
 
 		private class TestContext
