@@ -81,7 +81,7 @@ function Ensure-CommandExists($command, $tool, $version)
 	echo "Expecting [$tool] version [$version] at [$command]"
 	if(!$command -or !(Test-Path $command))
 	{
-		throw "Could not find version $version of $tool at $command - please check you have it installed via chocolatey (cinst opencover, cinst reportgenerator) or nuget." 
+		throw "Could not find version $version of $tool at $command " 
 	}
 }
 
