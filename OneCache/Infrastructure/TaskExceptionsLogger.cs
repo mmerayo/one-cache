@@ -8,6 +8,7 @@ namespace OneCache.Infrastructure
 	{
 		public static Task LogTaskException(this Task theTask, ILog theLogger, string logPrefix = "")
 		{
+			if (theLogger == null) throw new ArgumentNullException("theLogger");
 			return theTask.LogTaskException(theLogger.Error);
 		}
 
@@ -15,6 +16,7 @@ namespace OneCache.Infrastructure
 		public static Task LogTaskException(this Task theTask, Action<string> logExecutor, string logPrefix = "")
 		{
 			if (logExecutor == null) throw new ArgumentNullException("logExecutor");
+			if (logPrefix == null) throw new ArgumentNullException("logPrefix");
 
 			theTask.ContinueWith(task =>
 			{

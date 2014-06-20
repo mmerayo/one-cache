@@ -1,4 +1,6 @@
-﻿using Microsoft.ApplicationServer.Caching;
+﻿using System;
+using System.Runtime.Serialization;
+using Microsoft.ApplicationServer.Caching;
 
 namespace OneCache.AppFabric
 {
@@ -6,9 +8,11 @@ namespace OneCache.AppFabric
 	{
 		private readonly DataCacheException _innerException;
 
-		internal DataCacheExceptionWrapper()
+		internal DataCacheExceptionWrapper() 
 		{
 		}
+
+		public DataCacheExceptionWrapper(SerializationInfo info,StreamingContext context):base(info,context){}
 
 		public DataCacheExceptionWrapper(DataCacheException innerException) :
 			base(innerException.Message, innerException)
